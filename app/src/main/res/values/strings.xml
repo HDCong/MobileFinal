@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Đuổi Hình Bắt Chữ</string>
+    <string name="serverAddress">http://192.168.1.5:8515</string>
+
 </resources>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="#20A3B30E">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="20dp"
+        android:id="@+id/showRoomID">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Room ID"
+            android:id="@+id/textViewRoom"
+            android:textSize="22dp"
+            android:layout_weight="2"/>
+       <Spinner
+           android:layout_width="0dp"
+           android:layout_height="wrap_content"
+           android:layout_weight="4"
+           android:id="@+id/spinnerID"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/linearName"
+        android:orientation="horizontal"
+        android:layout_below="@id/showRoomID">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Your Name"
+            android:textSize="22dp"
+            android:layout_weight="2"/>
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="4"
+            android:id="@+id/editTextNameUser"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/linearName"
+        android:orientation="horizontal">
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonJoinRoom"
+            android:text="Join this room"
+            android:layout_weight="2"/>
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonCreate"
+            android:text="New Room"
+            android:layout_below="@id/showRoomID"
+            android:layout_toRightOf="@id/buttonJoinRoom"
+            android:layout_weight="2"/>
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonCancel"
+            android:text="Cancel"
+            android:layout_below="@id/showRoomID"
+            android:layout_toRightOf="@id/buttonCreate"
+            android:layout_weight="2"/>
+    </LinearLayout>
+
+</RelativeLayout>
