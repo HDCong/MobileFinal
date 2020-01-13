@@ -16,6 +16,7 @@ import com.github.nkzawa.emitter.Emitter
 import com.github.nkzawa.socketio.client.IO
 import com.github.nkzawa.socketio.client.Socket
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.get_room_dialog.*
 import kotlinx.android.synthetic.main.get_room_dialog.view.*
 import org.json.JSONException
 import org.json.JSONObject
@@ -28,6 +29,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var roomOptionView: View
     lateinit var spinner: Spinner
     lateinit var builder: AlertDialog.Builder
+    lateinit var intents : Intent
+    lateinit var editname :EditText
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -40,13 +43,16 @@ class MainActivity : AppCompatActivity() {
         } catch (e: URISyntaxException) {
             Log.e("CONG", e.message)
         }
+        intents = Intent(this,PlayOnlineActivity::class.java)
         roomOptionView = LayoutInflater.from(this).inflate(R.layout.get_room_dialog, null, false)
         spinner = roomOptionView.findViewById(R.id.spinnerID) as Spinner
         builder = AlertDialog.Builder(this)
             .setView(roomOptionView)
             .setTitle("Choose room")
+
         mSocket.on("RoomID", getRoomID)
-        mSocket.on("CreatedRoom", createdRoom)
+        mSocket.on("CreatedRoom", roomCreate)
+        mSocket.on("joinedRoom", joinedRoom)
         mSocket.on("errorOnAction", getReason)
     }
 
@@ -70,7 +76,7 @@ class MainActivity : AppCompatActivity() {
 
             }
             val mAlertDialog = builder.show()
-            var editname = roomOptionView.findViewById(R.id.editTextNameUser) as EditText
+            editname = roomOptionView.findViewById(R.id.editTextNameUser) as EditText
             roomOptionView.buttonCreate.setOnClickListener {
                 mSocket.emit("client-create",editname.text)
 
@@ -115,15 +121,37 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
-    private val createdRoom = Emitter.Listener { args ->
+    private val roomCreate = Emitter.Listener { args ->
         runOnUiThread(Runnable {
+            Log.e("Cong", ("vao create roomID"))
+
             val data = args[0] as JSONObject
             try {
-                Log.e("Cong", data.getString("roomID"))
-                val intent = Intent(this, PlayOnlineActivity::class.java)
-                intent.putExtra("flag", 1)
-                startActivity(intent)
+                Log.e("Cong", data.getString("roomid"))
 
+                intents.putExtra("flag", 1)
+                intents.putExtra("id", data.getString("roomid"))
+                intents.putExtra("name", editname.text.toString())
+                startActivity(intents)
+            } catch (e: JSONException) {
+                return@Runnable
+            }
+        })
+    }
+    private val joinedRoom = Emitter.Listener { args ->
+        runOnUiThread(Runnable {
+            Log.e("Cong", ("vao joined roomID"))
+
+            val data = args[0] as JSONObject
+            try {
+                Log.e("Cong", data.getString("ok"))
+
+//                val intent = Intent(this, PlayOnlineActivity::class.java)
+
+                intents.putExtra("flag", 0)
+                intents.putExtra("id", spinner.selectedItem.toString())
+                intents.putExtra("name", editname.text.toString())
+                startActivity(intents)
             } catch (e: JSONException) {
                 return@Runnable
             }

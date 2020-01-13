@@ -1,120 +1,350 @@
 package com.cntn2017_mobiledev.batchuduoihinh
 
-import androidx.appcompat.app.AppCompatActivity
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.os.Handler
+import android.util.DisplayMetrics
 import android.util.Log
-import android.widget.Toast
+import android.view.View
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import com.github.nkzawa.emitter.Emitter
 import com.github.nkzawa.socketio.client.IO
 import com.github.nkzawa.socketio.client.Socket
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_play_online.*
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.URISyntaxException
+import java.security.SecureRandom
 
-class PlayOnlineActivity : AppCompatActivity() {
+
+class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
     lateinit var mSocket: Socket
-    lateinit var arrayListChat : ArrayList<Chat>
-    lateinit var chatAdapter: ChatAdapter
+    var flag = 0
+    var rooomid = ""
+    //    var str =""
+    var countResponse = 0
+    var totalScore :Long = 0
+    var time :Long = 0
+    var username =""
+    lateinit var listUser : ArrayList<User>
+    var solution = ""
+    var urlPic = ""
+    var round = 1
+    var currentIdx = 0
+    var userSolution = ""
+    val secureRandom = SecureRandom()
+    var myButtons = ArrayList<Button>(16)
+    var countSelected = 0
+    lateinit var buttonStart: Button
+    lateinit var listViewPlayer: ListView
+    lateinit var t: List<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_play_online)
-        init()
+
+        flag = intent.extras?.getInt("flag") as Int
+        rooomid = intent.extras?.getString("id") as String
+        username =intent.extras?.getString("name") as String
+
+//        Log.e("CONG", str)
+        connectToSocket()
+        createWaitingView()
+
+        mSocket.on("question", getQuestionFromServer)
+
+        mSocket.on("updatePoint", updatePoint)
+
+        mSocket.on("listPlayer", getListPlayer)
+
+    }
+
+    @SuppressLint("ResourceType")
+    private fun createWaitingView() {
+        textViewShowRound.text = "Đang Đợi"
+        if (flag == 1) {
+            buttonStart = Button(this)
+            buttonStart.setLayoutParams(LinearLayout.LayoutParams(450, 150))
+            buttonStart.text = "Bắt đầu"
+            buttonStart.setOnClickListener(this)
+            buttonStart.setId(8988)
+            buttonStart.setLayoutParams(
+                TableLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT, 3f
+                )
+            )
+            layoutPictureQuestion.addView(buttonStart)
+        }
+        listViewPlayer = ListView(this)
+        listViewPlayer.setId(8981)
+        listViewPlayer.setLayoutParams(
+            TableLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+            )
+        )
+        layoutPictureQuestion.addView(listViewPlayer)
+        mSocket.emit("updateList", rooomid.toString(), "top")
+
+    }
+
+    private fun connectToSocket() {
         try {
             mSocket = IO.socket("http://192.168.1.6:8515")
         } catch (e: URISyntaxException) {
             Log.e("CONG", e.message)
         }
         mSocket.connect()
-        registerView()
 
-        mSocket.on("RoomID",getRoomID)
-        mSocket.on("test",getSomething)
-
-        arrayListChat.add(Chat("a",true,"mess5"))
-        chatAdapter.setItem(arrayListChat)
-        listViewChat.adapter= chatAdapter
+        mSocket.emit("updateList", rooomid.toString())
 
     }
 
-    private fun init() {
-        arrayListChat = ArrayList<Chat>()
-        arrayListChat.add(Chat("b",false,"mess0"))
-
-        arrayListChat.add(Chat("a",true,"mess1"))
-        arrayListChat.add(Chat("b",false,"mess2"))
-        arrayListChat.add(Chat("a",true,"mess3"))
-        arrayListChat.add(Chat("c",false,"mess4"))
-        chatAdapter = ChatAdapter(this);
-        chatAdapter.setItem(arrayListChat)
-        listViewChat.adapter= chatAdapter
-    }
-
-    private fun registerView() {
-        buttonDisconnect.setOnClickListener {
-            mSocket.disconnect()
-        }
-        buttonGetRoom.setOnClickListener {
+    private val getQuestionFromServer = Emitter.Listener { args ->
+        runOnUiThread(Runnable {
+            val data = args[0] as JSONObject
             try {
-                mSocket.emit("getRoomID")
-            } catch (ex: Exception) {
-                throw ex
+                Log.e("CONG1", t.toString())
+                urlPic = data.getString("url")
+                solution = data.getString("sol")
+                solution = solution.toUpperCase()
 
+                for (i in 0 until t.size){
+                    listUser = ArrayList<User>()
+                    listUser.add(User(t[i],0))
+
+                }
+
+                removeView()
+
+                initView()
+//                Log.e("CONG", listUser.toString())
+
+            } catch (e: JSONException) {
+                return@Runnable
+            }
+        })
+    }
+
+    private val updatePoint = Emitter.Listener { args ->
+        runOnUiThread(Runnable {
+            val data = args[0] as JSONObject
+            try {
+                val name = data.getString("user")
+                val newpoint = data.getString("point")
+                val pointnew = newpoint.toLong()
+                for ( i in 0 until listUser.size){
+                    if(name == listUser[i].userName){
+                        listUser[i].totalPoint= pointnew
+                    }
+                }
+                countResponse++
+
+            } catch (e: JSONException) {
+                return@Runnable
+            }
+        })
+    }
+    private val getListPlayer = Emitter.Listener { args ->
+        runOnUiThread(Runnable {
+            Log.e("CONG", "VAO GET LIST")
+            val data = args[0] as JSONObject
+            try {
+                var s = data.getString("list")
+                    .replace("[", "")
+                    .replace("{\"clientName\":", "")
+                    .replace("}", "")
+                    .replace("]", "")
+                t = s.split(",")
+                Log.e("CONG", s.toString())
+
+                Log.e("CONG", t.toString())
+                if (t != null) {
+                    val adapter = ArrayAdapter(
+                        this,
+                        android.R.layout.simple_list_item_1, t
+                    )
+                    listViewPlayer.adapter = adapter
+                }
+            } catch (e: JSONException) {
+                return@Runnable
+            }
+        })
+    }
+
+    private fun initView() {
+
+        initRound()
+
+        createImageViewQuestion()
+        // User choose
+        createButtonToSelect()
+        // The selected
+        createSelectedButton()
+    }
+
+    private fun getQuestionAndAnswer() {
+        mSocket.emit("getQuestionRoom")
+    }
+
+    private fun initRound() {
+        textViewShowRound.text = "Vòng " + round.toString()
+    }
+
+    private fun createImageViewQuestion() {
+        val imageViewPicture = ImageView(this)
+        Picasso.with(this).load(urlPic).into(imageViewPicture)
+        layoutPictureQuestion.addView(imageViewPicture)
+        object : CountDownTimer(60000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                textViewCountDown.setText("Còn lại: " + millisUntilFinished / 1000)
+                time = millisUntilFinished
+            }
+            override fun onFinish() {
+                textViewCountDown.setText("Hết giờ")
+                time = 0
+            }
+        }.start()
+    }
+
+    fun randomQuestions(): ArrayList<String> {
+        val arrS = ArrayList<String>()
+        val tm = secureRandom.nextInt(25) + 65
+        for (i in 0 until solution.length) {
+            arrS.add(solution.get(i).toString() + "")
+        }
+        for (i in 0 until 16 - solution.length) {
+            arrS.add(tm.toChar() + "")
+        }
+//        Log.e("CONG", arrS.toString())
+        return arrS
+    }
+
+    fun check(arrSolution: ArrayList<Int>, n: Int): Boolean {
+        for (i in 0..arrSolution.size - 1) {
+            if (n == arrSolution[i]) {
+                return false
             }
         }
-        buttonSend.setOnClickListener{
-            val obj = JSONObject()
-            obj.put("roomID","3")
-            obj.put("user","top")
-            obj.put("Message","Ahihi do ngoc")
+        return true
+    }
 
-            arrayListChat.add(Chat("top",true,"mess8"))
-            chatAdapter.setItem(arrayListChat)
+    private fun createButtonToSelect() {
+        var arraySolution = ArrayList<Int>()
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
 
-            mSocket.emit("chat", obj)
-
+        var width = displayMetrics.widthPixels
+        // For the first row
+        for (i in 0..7) {
+            val btn = Button(this) // tao nut
+            btn.layoutParams = LinearLayout.LayoutParams((width - 50) / 8, 150) // set layout
+            btn.setBackgroundResource(R.drawable.tile_hover) // set back ground
+            btn.setOnClickListener(this) // set on click listener
+            while (btn.text === "") {
+                val tmp: Int = secureRandom.nextInt(16)
+                if (check(arraySolution, tmp)) {
+                    btn.text = randomQuestions().get(tmp)
+                    randomQuestions().removeAt(tmp)
+                    arraySolution.add(tmp)
+                }
+            }
+            layoutButtonSelectFirst.addView(btn)
         }
-        buttonConnect.setOnClickListener {
-            mSocket.connect()
+        for (i in 0..7) {
+            val btn = Button(this) // tao nut
+            btn.layoutParams = LinearLayout.LayoutParams((width - 50) / 8, 150) // set layout
+            btn.setBackgroundResource(R.drawable.tile_hover) // set back ground
+            btn.setOnClickListener(this) // set on click listener
+            while (btn.text === "") {
+                val tmp: Int = secureRandom.nextInt(16)
+                if (check(arraySolution, tmp)) {
+                    btn.text = randomQuestions().get(tmp)
+                    randomQuestions().removeAt(tmp)
+                    arraySolution.add(tmp)
+                }
+            }
+            layoutButtonSelectSecond.addView(btn)
         }
     }
 
+    private fun createSelectedButton() {
+        for (i in 0 until solution.length) {
+            var btn = Button(this)
+            btn.layoutParams = LinearLayout.LayoutParams(100, 100)
+            btn.id = 8515 + i
+            btn.setBackgroundResource(R.drawable.button_xam)
+            layoutButtonAnswer.addView(btn)
+            myButtons.add(btn)
+        }
+    }
 
-    private fun makeToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    override fun onClick(v: View?) {
+        var button = v as Button
+        if (v.id == 8988) {
+            mSocket.emit("start-game", rooomid)
+            layoutPictureQuestion.removeAllViews()
+            return
+        }
+        var ts :Long = 0
+        if(time==ts){
+            val obj = JSONObject()
+            obj.put("roomID", rooomid)
+            obj.put("username", username)
+            obj.put("point", totalScore)
+            mSocket.emit("receive",obj)
+            return
+        }
+        if (currentIdx >= myButtons.size) return
+        myButtons[currentIdx].text = button.text
+        userSolution += button.text
+        currentIdx++
+        v.setEnabled(false)
+        v.text = ""
+        countSelected++
+        if (countSelected == solution.length) {
+
+            if (userSolution == solution) {
+                for (i in 0..solution.length - 1) {
+                    myButtons[i].setBackgroundResource(R.drawable.tile_true)
+                }
+                textViewResult.text = "Đúng rồi"
+                textViewResult.visibility = View.VISIBLE
+                totalScore+=time
+             } else {
+                for (i in 0..solution.length - 1) {
+                    myButtons[i].setBackgroundResource(R.drawable.tile_false)
+                }
+                textViewResult.text = "Sai rồi"
+                textViewResult.visibility = View.VISIBLE
+
+            }
+            val obj = JSONObject()
+            obj.put("roomID", rooomid)
+            obj.put("username", username)
+            obj.put("point", totalScore)
+            mSocket.emit("receive",obj)
+        }
+    }
+
+    private fun removeView() {
+        myButtons.clear()
+        layoutPictureQuestion.removeAllViews()
+        layoutButtonAnswer.removeAllViews()
+        layoutButtonSelectFirst.removeAllViews()
+        layoutButtonSelectSecond.removeAllViews()
+        textViewResult.setText("")
+        userSolution = ""
+        countSelected = 0
+        currentIdx = 0
     }
 
     override fun onBackPressed() {
         super.onBackPressed()
-        mSocket.disconnect()
-
+//        mSocket.disconnect()
     }
-    private val getRoomID = Emitter.Listener { args ->
-        runOnUiThread(Runnable {
-            val data = args[0] as JSONObject
-            var roomid: String
-            try {
-                roomid = data.getString("roomid")
-                makeToast(roomid)
-                Log.e("CONG", "romid : "+ roomid)
-
-            } catch (e: JSONException) {
-                return@Runnable
-            }
-        })
-    }
-    private val getSomething = Emitter.Listener { args ->
-        runOnUiThread(Runnable {
-            val data = args[0] as JSONObject
-            Log.e("COng", args[0].toString())
-            try {
-                makeToast(data.getString("user"))//toString())
-                Log.e("CONG",data.getString("user"))
-            } catch (e: JSONException) {
-                return@Runnable
-            }
-        })
-    }
-
 }
