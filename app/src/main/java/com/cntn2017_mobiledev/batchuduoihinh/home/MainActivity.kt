@@ -1,4 +1,4 @@
-package com.cntn2017_mobiledev.batchuduoihinh.mainactivity
+package com.cntn2017_mobiledev.batchuduoihinh.home
 
 import android.content.Intent
 import android.os.Bundle

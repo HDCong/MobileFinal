@@ -7,7 +7,7 @@ import android.os.Handler
 import android.widget.Toast
 import com.cntn2017_mobiledev.batchuduoihinh.R
 import com.cntn2017_mobiledev.batchuduoihinh.extension.openWithFadeInAnimation
-import com.cntn2017_mobiledev.batchuduoihinh.mainactivity.MainActivity
+import com.cntn2017_mobiledev.batchuduoihinh.home.MainActivity
 
 class SplashScreenActivity : AppCompatActivity() {
     var doubleBackToExitPressedOnce = false

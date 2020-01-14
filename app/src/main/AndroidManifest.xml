@@ -14,7 +14,7 @@
         android:usesCleartextTraffic="true">
         <activity android:name=".playonline.PlayOnlineActivity" />
         <activity android:name=".playoffline.PlayOfflineActivity" />
-        <activity android:name=".mainactivity.MainActivity" />
+        <activity android:name=".home.MainActivity" />
         <activity android:name=".splashscreen.SplashScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
