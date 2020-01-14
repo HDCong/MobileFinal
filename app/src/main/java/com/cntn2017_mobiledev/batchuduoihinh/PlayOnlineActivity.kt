@@ -6,14 +6,19 @@ import android.os.CountDownTimer
 import android.os.Handler
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.github.nkzawa.emitter.Emitter
 import com.github.nkzawa.socketio.client.IO
 import com.github.nkzawa.socketio.client.Socket
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_play_online.*
+import kotlinx.android.synthetic.main.chat_layout.*
+import kotlinx.android.synthetic.main.chat_layout.view.*
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.URISyntaxException
@@ -42,6 +47,27 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
     lateinit var listViewPlayer: ListView
     lateinit var t: List<String>
     var timer = timer(30000, 1000)
+    lateinit var rankingView: View
+
+    lateinit var listing: ListView
+
+    lateinit var builder: AlertDialog.Builder
+
+    lateinit var rankingAdapter: RankingAdapter
+
+    lateinit var chatView: View
+
+    lateinit var listChatContent: ListView
+
+    lateinit var builderChat: AlertDialog.Builder
+
+    lateinit var chatAdapter: ChatAdapter
+
+    lateinit var arrayListChat : ArrayList<Chat>
+
+    lateinit var editcontent :EditText
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_play_online)
@@ -52,12 +78,72 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
 
         connectToSocket()
         createWaitingView()
+        registerView()
+
+        rankingView = LayoutInflater.from(this).inflate(R.layout.ranking_layout, null, false)
+        rankingAdapter = RankingAdapter(this)
+        listing = rankingView.findViewById(R.id.listviewRanking) as ListView
+        builder = AlertDialog.Builder(this)
+            .setView(rankingView)
+            .setTitle("Ranking")
+
+        chatView = LayoutInflater.from(this).inflate(R.layout.chat_layout, null, false)
+        listChatContent = chatView.findViewById(R.id.listViewChat) as ListView
+        builderChat = AlertDialog.Builder(this)
+            .setView(chatView)
+            .setTitle("Chat")
+        arrayListChat = ArrayList<Chat>()
+        chatAdapter= ChatAdapter(this)
+
 
         mSocket.on("question", getQuestionFromServer)
 
         mSocket.on("updatePoint", updatePoint)
 
         mSocket.on("listPlayer", getListPlayer)
+
+        mSocket.on("chatResponse", onChatResponse)
+
+    }
+
+    private fun registerView() {
+        buttonRank.setOnClickListener {
+
+            val par = rankingView.parent
+            if (par != null)
+            {
+                val par2 = par as ViewGroup
+                par2.removeView(rankingView)
+
+            }
+            val mAlertDialog = builder.show()
+
+        }
+
+        buttonChat.setOnClickListener {
+            val par = chatView.parent
+            if (par != null)
+            {
+                val par2 = par as ViewGroup
+                par2.removeView(chatView)
+
+            }
+            editcontent = chatView.findViewById(R.id.editTextChat) as EditText
+            val mAlertDialog = builderChat.show()
+            chatView.buttonSend.setOnClickListener {
+                var obj = JSONObject()
+                obj.put("roomID", rooomid)
+                obj.put("Message", editcontent.text.toString())
+                obj.put("user", username)
+                arrayListChat.add(Chat(username,true,editcontent.text.toString()))
+                chatAdapter.setItem(arrayListChat)
+                listChatContent.adapter=chatAdapter
+                mSocket.emit("chat", obj)
+            }
+        }
+
+//        mSocket.emit("updateList", rooomid,username)
+
     }
 
     // Method to configure and return an instance of CountDownTimer object
@@ -72,12 +158,11 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                 textViewCountDown.setText("Hết giờ")
                 time = 0
 //                round++
+                countResponse=0
                 mSocket.emit("start-game",rooomid,round)
             }
         }
     }
-
-
     @SuppressLint("ResourceType")
     private fun createWaitingView() {
         textViewShowRound.text = "Đang Đợi"
@@ -104,19 +189,20 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
             )
         )
         layoutPictureQuestion.addView(listViewPlayer)
-        mSocket.emit("updateList", rooomid.toString(), "top")
+
+        mSocket.emit("updateList", rooomid.toString(),username+"o create ")
 
     }
 
     private fun connectToSocket() {
         try {
-            mSocket = IO.socket("http://192.168.1.6:8515")
+            mSocket = IO.socket("https://chasing-word.herokuapp.com/")
         } catch (e: URISyntaxException) {
             Log.e("CONG", e.message)
         }
         mSocket.connect()
 
-        mSocket.emit("updateList", rooomid.toString())
+        mSocket.emit("updateList", rooomid.toString(),username+"o connect")
 
     }
 
@@ -159,11 +245,19 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                     }
                     Log.e("CONG-Point",listUser[i].userName +"- " + listUser[i].totalPoint.toString())
                 }
+                val temp = listUser.sortedByDescending { it.totalPoint?.toLong() }
+                val sorted = ArrayList<User>()
+
+                temp.forEach{
+                    sorted.add(it)
+                }
+
+                rankingAdapter.setItem(sorted)
+                listing.adapter=rankingAdapter
 
                 countResponse++
                 Log.e("CONG", "count: " + countResponse.toString())
-                if (countResponse == listUser.size + 1) {
-
+                if (countResponse == listUser.size ) {
                     countResponse=0
 
                     mSocket.emit("start-game", rooomid,round)
@@ -178,6 +272,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
             }
         })
     }
+
     private val getListPlayer = Emitter.Listener { args ->
         runOnUiThread(Runnable {
             Log.e("CONG", "VAO GET LIST")
@@ -189,20 +284,46 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                     .replace("}", "")
                     .replace("]", "")
                     .replace("\"","")
+
                 t = s.split(",")
-                Log.e("CONG", s.toString())
                 Log.e("CONG", t.toString())
+
                 if (t != null) {
                     val adapter = ArrayAdapter(
                         this,
                         android.R.layout.simple_list_item_1, t
                     )
+
                     listViewPlayer.adapter = adapter
+
+                    Log.e("CONG", "DA SET")
                     listUser = ArrayList<User>()
                     for (i in 0 until t.size) {
                         listUser.add(User(t[i], "0"))
                     }
+
+                    rankingAdapter.setItem(listUser)
+                    listing.adapter=rankingAdapter
+
                 }
+            } catch (e: JSONException) {
+                return@Runnable
+            }
+        })
+    }
+
+    private val onChatResponse = Emitter.Listener { args ->
+        runOnUiThread(Runnable {
+            Log.e("CONG", "VAO chat response")
+            val data = args[0] as JSONObject
+            try {
+                var userChat = data.getString("user")
+                var messageChat = data.getString("message")
+                arrayListChat.add(Chat(userChat,false,messageChat))
+                chatAdapter.setItem(arrayListChat)
+                listChatContent.adapter=chatAdapter
+
+
             } catch (e: JSONException) {
                 return@Runnable
             }
@@ -233,6 +354,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         Picasso.with(this).load(urlPic).into(imageViewPicture)
         layoutPictureQuestion.addView(imageViewPicture)
         resetCountDowntimer()
+        countResponse=0
     }
 
     fun randomQuestions(): ArrayList<String> {
@@ -301,7 +423,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
             var btn = Button(this)
             btn.layoutParams = LinearLayout.LayoutParams(100, 100)
             btn.id = 8515 + i
-            btn.setBackgroundResource(R.drawable.button_xam)
+            btn.setBackgroundResource(R.drawable.word_button)
             layoutButtonAnswer.addView(btn)
             myButtons.add(btn)
         }

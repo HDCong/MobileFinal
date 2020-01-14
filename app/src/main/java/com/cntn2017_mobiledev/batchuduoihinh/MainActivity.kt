@@ -27,17 +27,22 @@ class MainActivity : AppCompatActivity() {
     lateinit var mSocket: Socket
     lateinit var t: List<String>
     lateinit var roomOptionView: View
+
     lateinit var spinner: Spinner
+
     lateinit var builder: AlertDialog.Builder
+
     lateinit var intents : Intent
+
     lateinit var editname :EditText
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         registerView()
         // Connect
         try {
-            mSocket = IO.socket("http://192.168.1.6:8515")
+            mSocket = IO.socket("https://chasing-word.herokuapp.com/")
             mSocket.connect()
 
         } catch (e: URISyntaxException) {
@@ -45,7 +50,9 @@ class MainActivity : AppCompatActivity() {
         }
         intents = Intent(this,PlayOnlineActivity::class.java)
         roomOptionView = LayoutInflater.from(this).inflate(R.layout.get_room_dialog, null, false)
+
         spinner = roomOptionView.findViewById(R.id.spinnerID) as Spinner
+
         builder = AlertDialog.Builder(this)
             .setView(roomOptionView)
             .setTitle("Choose room")
@@ -76,7 +83,9 @@ class MainActivity : AppCompatActivity() {
 
             }
             val mAlertDialog = builder.show()
+
             editname = roomOptionView.findViewById(R.id.editTextNameUser) as EditText
+
             roomOptionView.buttonCreate.setOnClickListener {
                 mSocket.emit("client-create",editname.text)
                 mAlertDialog.dismiss()
@@ -88,18 +97,18 @@ class MainActivity : AppCompatActivity() {
                 if(editname.text.length<3){
                     makeToast("Tên phải dài hơn 3 kí tự")
                 }
-                obj.put("name", editname.text)
+                else{
+                    obj.put("name", editname.text)
 
-                Log.e("CONG", spinner.selectedItem.toString())
-                mSocket.emit("joinRoom", obj)
-                mAlertDialog.dismiss()
-
+                    Log.e("CONG", spinner.selectedItem.toString())
+                    mSocket.emit("joinRoom", obj)
+                    mAlertDialog.dismiss()
+                }
             }
             roomOptionView.buttonCancel.setOnClickListener {
                 mAlertDialog.dismiss()
             }
         }
-
     }
 
     private val getRoomID = Emitter.Listener { args ->

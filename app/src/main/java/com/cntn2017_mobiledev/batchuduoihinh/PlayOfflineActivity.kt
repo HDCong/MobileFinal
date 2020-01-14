@@ -43,7 +43,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun connectToSocket() {
         try {
-            mSocket = IO.socket("http://192.168.1.6:8515")
+            mSocket = IO.socket("https://chasing-word.herokuapp.com/")
         } catch (e: URISyntaxException) {
             Log.e("CONG", e.message)
         }
@@ -154,7 +154,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
             var btn = Button(this)
             btn.layoutParams = LinearLayout.LayoutParams(100, 100)
             btn.id = 8515 + i
-            btn.setBackgroundResource(R.drawable.button_xam)
+            btn.setBackgroundResource(R.drawable.word_button)
             layoutButtonAnswer.addView(btn)
             myButtons.add(btn)
         }
