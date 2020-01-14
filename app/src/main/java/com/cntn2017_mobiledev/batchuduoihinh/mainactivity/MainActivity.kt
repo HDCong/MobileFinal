@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
 
             var width = displayMetrics.widthPixels
             var height = displayMetrics.heightPixels
-            mAlertDialog.getWindow()?.setLayout((width*0.8).toInt(), (height*0.8).toInt()); //Controlling width and height.
+            mAlertDialog.getWindow()?.setLayout((width*0.9).toInt(), (height*0.9).toInt()); //Controlling width and height.
 
 
             editname = roomOptionView.findViewById(R.id.editTextNameUser) as EditText
@@ -117,7 +117,7 @@ class MainActivity : AppCompatActivity() {
                     makeToast("Tên phải dài hơn 3 kí tự")
                 }
                 else{
-                    if(spinner.selectedItem.toString().length> 0){
+                    if(spinner.selectedItem.toString().length < 1){
                         makeToast("Bạn phải chọn phòng trước")
                     }
                     else{

@@ -10,7 +10,7 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="439.8px"
-        android:layout_marginVertical="50dp"
+        android:layout_marginVertical="20dp"
         android:background="@drawable/banner_nobackground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
