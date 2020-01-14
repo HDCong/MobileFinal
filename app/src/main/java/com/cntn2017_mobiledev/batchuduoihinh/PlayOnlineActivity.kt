@@ -147,15 +147,15 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
 
     private val updatePoint = Emitter.Listener { args ->
         runOnUiThread(Runnable {
-            Log.e("Vao update point")
+            Log.e("CONG","Vao update point")
             val data = args[0] as JSONObject
             try {
                 val name = data.getString("user")
                 val newpoint = data.getString("point")
-                val pointnew = newpoint.toLong()
+                Log.e("CONG" , name +"-" + newpoint)
                 for (i in 0 until listUser.size) {
                     if (name == listUser[i].userName) {
-                        listUser[i].totalPoint = pointnew
+                        listUser[i].totalPoint = newpoint
                     }
                     Log.e("CONG-Point",listUser[i].userName +"- " + listUser[i].totalPoint.toString())
                 }
@@ -188,9 +188,9 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                     .replace("{\"clientName\":", "")
                     .replace("}", "")
                     .replace("]", "")
+                    .replace("\"","")
                 t = s.split(",")
                 Log.e("CONG", s.toString())
-
                 Log.e("CONG", t.toString())
                 if (t != null) {
                     val adapter = ArrayAdapter(
@@ -200,7 +200,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                     listViewPlayer.adapter = adapter
                     listUser = ArrayList<User>()
                     for (i in 0 until t.size) {
-                        listUser.add(User(t[i], 0))
+                        listUser.add(User(t[i], "0"))
                     }
                 }
             } catch (e: JSONException) {
@@ -323,7 +323,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         v.text = ""
         countSelected++
         if (countSelected == solution.length) {
-
+            Log.e("CONG","bang rui nek")
             if (userSolution == solution) {
                 for (i in 0..solution.length - 1) {
                     myButtons[i].setBackgroundResource(R.drawable.tile_true)
@@ -343,7 +343,8 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
             val obj = JSONObject()
             obj.put("roomID", rooomid)
             obj.put("username", username)
-            obj.put("point", totalScore)
+            obj.put("point", totalScore.toString())
+            Log.e("CONG-POINT" , totalScore.toString())
             mSocket.emit("receive", obj)
         }
     }
