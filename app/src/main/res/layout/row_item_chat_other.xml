@@ -13,7 +13,12 @@
         android:layout_height="wrap_content"
         android:id="@+id/textViewMessage"
         android:layout_below="@id/textViewName"
-        android:text="Meo beo thong minh"
+        android:text="Meo beo thong minh meo beo thong minh meo beo thong minh meo beo thong minh"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="100dp"
+        android:layout_marginVertical="15dp"
+        android:padding="8dp"
+        android:background="#708090"
         android:textStyle="bold"
         android:textSize="18sp"/>
 </RelativeLayout>

@@ -1,11 +1,14 @@
-package com.cntn2017_mobiledev.batchuduoihinh
+package com.cntn2017_mobiledev.batchuduoihinh.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.ImageView
 import android.widget.TextView
+import com.cntn2017_mobiledev.batchuduoihinh.R
+import com.cntn2017_mobiledev.batchuduoihinh.models.User
 import java.util.ArrayList
 
 class RankingAdapter(context: Context) : BaseAdapter() {
@@ -26,7 +29,17 @@ class RankingAdapter(context: Context) : BaseAdapter() {
         }
         var name = view.findViewById(R.id.textviewUserName) as TextView
         var point = view.findViewById(R.id.textViewScore) as TextView
-
+        if(position==0){
+            var ima = view.findViewById<ImageView>(R.id.imageViewRanking)
+            ima.setImageResource(R.drawable.rand_first)
+        }
+        else if(position==1){
+            var ima = view.findViewById<ImageView>(R.id.imageViewRanking)
+            ima.setImageResource(R.drawable.rand_second)
+        }else if(position==2){
+            var ima = view.findViewById<ImageView>(R.id.imageViewRanking)
+            ima.setImageResource(R.drawable.rank_third)
+        }
         name.text = info.userName
         point.text = info.totalPoint
 

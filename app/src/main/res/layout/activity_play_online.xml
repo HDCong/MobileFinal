@@ -5,19 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#87CEFA"
-    tools:context=".PlayOnlineActivity">
+    tools:context=".playonline.PlayOnlineActivity">
     <!--    Show round -->
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical"
+        android:id="@+id/lineartfirst"
+        android:orientation="horizontal"
         android:padding="20dp">
 
         <TextView
             android:id="@+id/textViewShowRound"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3"
             android:fontFamily="@font/atomic_age"
@@ -25,11 +26,17 @@
 
         <TextView
             android:id="@+id/textViewCountDown"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3"
+            android:layout_weight="2"
             android:fontFamily="@font/atomic_age"
             android:textSize="20sp" />
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/hint_icon"
+            android:visibility="gone"
+            android:id="@+id/buttonHintOnl" />
     </LinearLayout>
     <!--    Show picture-->
     <LinearLayout
@@ -48,6 +55,7 @@
         android:layout_height="0dp"
         android:layout_weight="1.5"
         android:gravity="center"
+        android:layout_margin="5dp"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -96,15 +104,16 @@
 
             <Button
                 android:id="@+id/buttonRank"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="rank" />
-
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/podium"
+                android:layout_margin="25dp"/>
             <Button
                 android:id="@+id/buttonChat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Chat" />
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/message"
+                android:layout_margin="25dp" />
         </LinearLayout>
     </LinearLayout>
     <!--    Show pick button-->
@@ -112,7 +121,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_margin="10dp">
 
         <LinearLayout
             android:id="@+id/layoutButtonSelectFirst"

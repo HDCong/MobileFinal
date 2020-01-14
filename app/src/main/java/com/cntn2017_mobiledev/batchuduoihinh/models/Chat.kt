@@ -1,4 +1,4 @@
-package com.cntn2017_mobiledev.batchuduoihinh
+package com.cntn2017_mobiledev.batchuduoihinh.models
 
 class Chat (
     val mOwner : String? = null,

@@ -1,12 +1,13 @@
-package com.cntn2017_mobiledev.batchuduoihinh
+package com.cntn2017_mobiledev.batchuduoihinh.adapter
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
+import com.cntn2017_mobiledev.batchuduoihinh.models.Chat
+import com.cntn2017_mobiledev.batchuduoihinh.R
 import java.util.*
 
 

@@ -1,4 +1,4 @@
-package com.cntn2017_mobiledev.batchuduoihinh
+package com.cntn2017_mobiledev.batchuduoihinh.playoffline
 
 import android.os.Bundle
 import android.os.Handler
@@ -7,7 +7,9 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.cntn2017_mobiledev.batchuduoihinh.R
 import com.github.nkzawa.emitter.Emitter
 import com.github.nkzawa.socketio.client.IO
 import com.github.nkzawa.socketio.client.Socket
@@ -18,9 +20,12 @@ import org.json.JSONObject
 import java.net.URISyntaxException
 import java.security.SecureRandom
 
-class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
-    lateinit var mSocket: Socket
 
+class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
+    var doubleBackToExitPressedOnce = false
+
+    lateinit var mSocket: Socket
+    var help = 3
     var solution = ""
     var urlPic = ""
     var round = 1
@@ -38,7 +43,28 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
         getQuestionAndAnswer()
         mSocket.on("QuestionNek", getQuestionFromServer)
 
+        registerView()
+    }
 
+    private fun registerView() {
+
+        buttonHint.setOnClickListener {
+            if (help > 0) {
+                if (currentIdx >= solution.length - 1) {
+                    Toast.makeText(this, "Còn chữ cuối tự đoán đi :)", Toast.LENGTH_SHORT).show()
+                }
+                else {
+                    myButtons[currentIdx].text = solution[currentIdx].toString()
+                    userSolution += solution[currentIdx].toString()
+                    currentIdx++
+                    countSelected++
+                    help--
+                }
+            } else {
+                Toast.makeText(this, "Chỉ được gợi ý tối đa 3 chữ cái 1 vòng", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
     }
 
     private fun connectToSocket() {
@@ -81,6 +107,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun initRound() {
+        relativeFirst.visibility = View.VISIBLE
         textViewShowRound.text = "Vòng " + round.toString()
     }
 
@@ -217,10 +244,16 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
         userSolution = ""
         countSelected = 0
         currentIdx = 0
+        help = 3
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
-//        mSocket.disconnect()
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed()
+            return
+        }
+        this.doubleBackToExitPressedOnce = true
+        Toast.makeText(this, "Click lần nữa để thoát", Toast.LENGTH_SHORT).show()
+        Handler().postDelayed(Runnable { doubleBackToExitPressedOnce = false }, 2000)
     }
 }

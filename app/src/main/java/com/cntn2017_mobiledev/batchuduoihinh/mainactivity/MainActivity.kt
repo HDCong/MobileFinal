@@ -1,7 +1,9 @@
-package com.cntn2017_mobiledev.batchuduoihinh
+package com.cntn2017_mobiledev.batchuduoihinh.mainactivity
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,11 +14,13 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.cntn2017_mobiledev.batchuduoihinh.R
+import com.cntn2017_mobiledev.batchuduoihinh.playoffline.PlayOfflineActivity
+import com.cntn2017_mobiledev.batchuduoihinh.playonline.PlayOnlineActivity
 import com.github.nkzawa.emitter.Emitter
 import com.github.nkzawa.socketio.client.IO
 import com.github.nkzawa.socketio.client.Socket
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.get_room_dialog.*
 import kotlinx.android.synthetic.main.get_room_dialog.view.*
 import org.json.JSONException
 import org.json.JSONObject
@@ -24,6 +28,8 @@ import java.net.URISyntaxException
 
 
 class MainActivity : AppCompatActivity() {
+    var doubleBackToExitPressedOnce = false
+
     lateinit var mSocket: Socket
     lateinit var t: List<String>
     lateinit var roomOptionView: View
@@ -48,7 +54,8 @@ class MainActivity : AppCompatActivity() {
         } catch (e: URISyntaxException) {
             Log.e("CONG", e.message)
         }
-        intents = Intent(this,PlayOnlineActivity::class.java)
+        intents = Intent(this,
+            PlayOnlineActivity::class.java)
         roomOptionView = LayoutInflater.from(this).inflate(R.layout.get_room_dialog, null, false)
 
         spinner = roomOptionView.findViewById(R.id.spinnerID) as Spinner
@@ -83,12 +90,24 @@ class MainActivity : AppCompatActivity() {
 
             }
             val mAlertDialog = builder.show()
+            val displayMetrics = DisplayMetrics()
+            windowManager.defaultDisplay.getMetrics(displayMetrics)
+
+            var width = displayMetrics.widthPixels
+            var height = displayMetrics.heightPixels
+            mAlertDialog.getWindow()?.setLayout((width*0.8).toInt(), (height*0.8).toInt()); //Controlling width and height.
+
 
             editname = roomOptionView.findViewById(R.id.editTextNameUser) as EditText
 
             roomOptionView.buttonCreate.setOnClickListener {
-                mSocket.emit("client-create",editname.text)
-                mAlertDialog.dismiss()
+                if(editname.text.length <3 ){
+                    makeToast("Tên phải dài hơn 3 kí tự")
+                }
+                else{
+                    mSocket.emit("client-create",editname.text)
+                    mAlertDialog.dismiss()
+                }
 
             }
             roomOptionView.buttonJoinRoom.setOnClickListener {
@@ -98,11 +117,15 @@ class MainActivity : AppCompatActivity() {
                     makeToast("Tên phải dài hơn 3 kí tự")
                 }
                 else{
-                    obj.put("name", editname.text)
-
-                    Log.e("CONG", spinner.selectedItem.toString())
-                    mSocket.emit("joinRoom", obj)
-                    mAlertDialog.dismiss()
+                    if(spinner.selectedItem.toString().length> 0){
+                        makeToast("Bạn phải chọn phòng trước")
+                    }
+                    else{
+                        obj.put("name", editname.text)
+                        Log.e("CONG", spinner.selectedItem.toString())
+                        mSocket.emit("joinRoom", obj)
+                        mAlertDialog.dismiss()
+                    }
                 }
             }
             roomOptionView.buttonCancel.setOnClickListener {
@@ -158,8 +181,6 @@ class MainActivity : AppCompatActivity() {
             try {
                 Log.e("Cong", data.getString("ok"))
 
-//                val intent = Intent(this, PlayOnlineActivity::class.java)
-
                 intents.putExtra("flag", 0)
                 intents.putExtra("id", spinner.selectedItem.toString())
                 intents.putExtra("name", editname.text.toString())
@@ -185,5 +206,14 @@ class MainActivity : AppCompatActivity() {
     private fun makeToast(string: String) {
 
         Toast.makeText(this, string, Toast.LENGTH_SHORT).show()
+    }
+    override fun onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed()
+            return
+        }
+        this.doubleBackToExitPressedOnce = true
+        Toast.makeText(this,"Click lan nua de thoat",Toast.LENGTH_SHORT).show()
+        Handler().postDelayed(Runnable { doubleBackToExitPressedOnce = false }, 2000)
     }
 }

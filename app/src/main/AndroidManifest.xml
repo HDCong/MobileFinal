@@ -12,10 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ChooseRoom"></activity>
-        <activity android:name=".PlayOnlineActivity" />
-        <activity android:name=".PlayOfflineActivity" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".playonline.PlayOnlineActivity" />
+        <activity android:name=".playoffline.PlayOfflineActivity" />
+        <activity android:name=".mainactivity.MainActivity" />
+        <activity android:name=".splashscreen.SplashScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

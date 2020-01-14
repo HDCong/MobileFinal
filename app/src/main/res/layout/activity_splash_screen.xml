@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".splashscreen.SplashScreenActivity"
+    android:id="@+id/splashLayout">
+
+
+    <ImageView
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/appicon"
+        android:id="@+id/splashIcon"/>
+
+    <com.agrawalsuneet.dotsloader.loaders.TashieLoader
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:tashieloader_animDelay="100"
+        app:tashieloader_animDur="1000"
+        app:tashieloader_dotsColor="#000"
+        app:tashieloader_dotsDist="5dp"
+        app:tashieloader_dotsRadius="3dp"
+        app:tashieloader_interpolator="@android:anim/accelerate_interpolator"
+        app:tashieloader_noOfDots="6"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/splashIcon"
+        android:layout_centerInParent="true"/>
+</RelativeLayout>

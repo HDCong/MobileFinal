@@ -1,4 +1,4 @@
-package com.cntn2017_mobiledev.batchuduoihinh
+package com.cntn2017_mobiledev.batchuduoihinh.playonline
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -12,12 +12,16 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.cntn2017_mobiledev.batchuduoihinh.*
+import com.cntn2017_mobiledev.batchuduoihinh.adapter.ChatAdapter
+import com.cntn2017_mobiledev.batchuduoihinh.adapter.RankingAdapter
+import com.cntn2017_mobiledev.batchuduoihinh.models.Chat
+import com.cntn2017_mobiledev.batchuduoihinh.models.User
 import com.github.nkzawa.emitter.Emitter
 import com.github.nkzawa.socketio.client.IO
 import com.github.nkzawa.socketio.client.Socket
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_play_online.*
-import kotlinx.android.synthetic.main.chat_layout.*
 import kotlinx.android.synthetic.main.chat_layout.view.*
 import org.json.JSONException
 import org.json.JSONObject
@@ -26,6 +30,7 @@ import java.security.SecureRandom
 
 
 class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
+    var doubleBackToExitPressedOnce = false
     lateinit var mSocket: Socket
     var flag = 0
     var rooomid = ""
@@ -63,9 +68,9 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
 
     lateinit var chatAdapter: ChatAdapter
 
-    lateinit var arrayListChat : ArrayList<Chat>
+    lateinit var arrayListChat: ArrayList<Chat>
 
-    lateinit var editcontent :EditText
+    lateinit var editcontent: EditText
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,7 +86,8 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         registerView()
 
         rankingView = LayoutInflater.from(this).inflate(R.layout.ranking_layout, null, false)
-        rankingAdapter = RankingAdapter(this)
+        rankingAdapter =
+            RankingAdapter(this)
         listing = rankingView.findViewById(R.id.listviewRanking) as ListView
         builder = AlertDialog.Builder(this)
             .setView(rankingView)
@@ -93,7 +99,8 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
             .setView(chatView)
             .setTitle("Chat")
         arrayListChat = ArrayList<Chat>()
-        chatAdapter= ChatAdapter(this)
+        chatAdapter =
+            ChatAdapter(this)
 
 
         mSocket.on("question", getQuestionFromServer)
@@ -110,8 +117,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         buttonRank.setOnClickListener {
 
             val par = rankingView.parent
-            if (par != null)
-            {
+            if (par != null) {
                 val par2 = par as ViewGroup
                 par2.removeView(rankingView)
 
@@ -122,28 +128,52 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
 
         buttonChat.setOnClickListener {
             val par = chatView.parent
-            if (par != null)
-            {
+            if (par != null) {
                 val par2 = par as ViewGroup
                 par2.removeView(chatView)
 
             }
             editcontent = chatView.findViewById(R.id.editTextChat) as EditText
+
             val mAlertDialog = builderChat.show()
+
             chatView.buttonSend.setOnClickListener {
                 var obj = JSONObject()
                 obj.put("roomID", rooomid)
                 obj.put("Message", editcontent.text.toString())
                 obj.put("user", username)
-                arrayListChat.add(Chat(username,true,editcontent.text.toString()))
+                arrayListChat.add(
+                    Chat(
+                        username,
+                        true,
+                        editcontent.text.toString()
+                    )
+                )
                 chatAdapter.setItem(arrayListChat)
-                listChatContent.adapter=chatAdapter
+                listChatContent.adapter = chatAdapter
                 mSocket.emit("chat", obj)
+                editcontent.setText("")
             }
         }
 
 //        mSocket.emit("updateList", rooomid,username)
 
+        buttonHintOnl.setOnClickListener {
+            if (totalScore > 1000) {
+                if (currentIdx == solution.length - 2) {
+                    Toast.makeText(this, "Còn chữ cuối tự đoán đi :)", Toast.LENGTH_SHORT).show()
+
+                } else {
+                    myButtons[currentIdx].text = solution[currentIdx].toString()
+                    userSolution += solution[currentIdx].toString()
+                    currentIdx++
+                    countSelected++
+                    totalScore -= 1000
+                }
+            } else {
+                Toast.makeText(this, "Số điểm ít hơn 1000", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     // Method to configure and return an instance of CountDownTimer object
@@ -158,11 +188,12 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                 textViewCountDown.setText("Hết giờ")
                 time = 0
 //                round++
-                countResponse=0
-                mSocket.emit("start-game",rooomid,round)
+                countResponse = 0
+                mSocket.emit("start-game", rooomid, round)
             }
         }
     }
+
     @SuppressLint("ResourceType")
     private fun createWaitingView() {
         textViewShowRound.text = "Đang Đợi"
@@ -190,7 +221,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         )
         layoutPictureQuestion.addView(listViewPlayer)
 
-        mSocket.emit("updateList", rooomid.toString(),username+"o create ")
+        mSocket.emit("updateList", rooomid.toString(), username + "o create ")
 
     }
 
@@ -202,7 +233,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         }
         mSocket.connect()
 
-        mSocket.emit("updateList", rooomid.toString(),username+"o connect")
+        mSocket.emit("updateList", rooomid.toString(), username + "o connect")
 
     }
 
@@ -223,7 +254,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                 round = data.getInt("rou")
 
                 removeView()
-                linearButton.visibility=View.VISIBLE
+                linearButton.visibility = View.VISIBLE
                 initView()
             } catch (e: JSONException) {
                 return@Runnable
@@ -233,34 +264,37 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
 
     private val updatePoint = Emitter.Listener { args ->
         runOnUiThread(Runnable {
-            Log.e("CONG","Vao update point")
+            Log.e("CONG", "Vao update point")
             val data = args[0] as JSONObject
             try {
                 val name = data.getString("user")
                 val newpoint = data.getString("point")
-                Log.e("CONG" , name +"-" + newpoint)
+                Log.e("CONG", name + "-" + newpoint)
                 for (i in 0 until listUser.size) {
                     if (name == listUser[i].userName) {
                         listUser[i].totalPoint = newpoint
                     }
-                    Log.e("CONG-Point",listUser[i].userName +"- " + listUser[i].totalPoint.toString())
+                    Log.e(
+                        "CONG-Point",
+                        listUser[i].userName + "- " + listUser[i].totalPoint.toString()
+                    )
                 }
                 val temp = listUser.sortedByDescending { it.totalPoint?.toLong() }
                 val sorted = ArrayList<User>()
 
-                temp.forEach{
+                temp.forEach {
                     sorted.add(it)
                 }
 
                 rankingAdapter.setItem(sorted)
-                listing.adapter=rankingAdapter
+                listing.adapter = rankingAdapter
 
                 countResponse++
                 Log.e("CONG", "count: " + countResponse.toString())
-                if (countResponse == listUser.size ) {
-                    countResponse=0
+                if (countResponse == listUser.size) {
+                    countResponse = 0
 
-                    mSocket.emit("start-game", rooomid,round)
+                    mSocket.emit("start-game", rooomid, round)
 
                     removeView()
 
@@ -283,7 +317,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                     .replace("{\"clientName\":", "")
                     .replace("}", "")
                     .replace("]", "")
-                    .replace("\"","")
+                    .replace("\"", "")
 
                 t = s.split(",")
                 Log.e("CONG", t.toString())
@@ -299,11 +333,16 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                     Log.e("CONG", "DA SET")
                     listUser = ArrayList<User>()
                     for (i in 0 until t.size) {
-                        listUser.add(User(t[i], "0"))
+                        listUser.add(
+                            User(
+                                t[i],
+                                "0"
+                            )
+                        )
                     }
 
                     rankingAdapter.setItem(listUser)
-                    listing.adapter=rankingAdapter
+                    listing.adapter = rankingAdapter
 
                 }
             } catch (e: JSONException) {
@@ -319,9 +358,15 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
             try {
                 var userChat = data.getString("user")
                 var messageChat = data.getString("message")
-                arrayListChat.add(Chat(userChat,false,messageChat))
+                arrayListChat.add(
+                    Chat(
+                        userChat,
+                        false,
+                        messageChat
+                    )
+                )
                 chatAdapter.setItem(arrayListChat)
-                listChatContent.adapter=chatAdapter
+                listChatContent.adapter = chatAdapter
 
 
             } catch (e: JSONException) {
@@ -353,8 +398,9 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         val imageViewPicture = ImageView(this)
         Picasso.with(this).load(urlPic).into(imageViewPicture)
         layoutPictureQuestion.addView(imageViewPicture)
+        buttonHintOnl.visibility = View.VISIBLE
         resetCountDowntimer()
-        countResponse=0
+        countResponse = 0
     }
 
     fun randomQuestions(): ArrayList<String> {
@@ -432,9 +478,14 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         var button = v as Button
         if (v.id == 8988) {
-            mSocket.emit("start-game", rooomid,round)
-            Log.e("CONG", "START GAME")
+            if (listUser.size >= 2) {
+                mSocket.emit("start-game", rooomid, round)
+                Log.e("CONG", "START GAME")
+            } else {
+                Toast.makeText(this, "Đợi người vô chơi đi ba", Toast.LENGTH_SHORT).show()
+            }
             return
+
         }
 
         if (currentIdx >= myButtons.size) return
@@ -445,7 +496,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         v.text = ""
         countSelected++
         if (countSelected == solution.length) {
-            Log.e("CONG","bang rui nek")
+            Log.e("CONG", "bang rui nek")
             if (userSolution == solution) {
                 for (i in 0..solution.length - 1) {
                     myButtons[i].setBackgroundResource(R.drawable.tile_true)
@@ -466,7 +517,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
             obj.put("roomID", rooomid)
             obj.put("username", username)
             obj.put("point", totalScore.toString())
-            Log.e("CONG-POINT" , totalScore.toString())
+            Log.e("CONG-POINT", totalScore.toString())
             mSocket.emit("receive", obj)
         }
     }
@@ -483,8 +534,14 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         currentIdx = 0
     }
 
+
     override fun onBackPressed() {
-        super.onBackPressed()
-//        mSocket.disconnect()
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed()
+            return
+        }
+        this.doubleBackToExitPressedOnce = true
+        Toast.makeText(this, "Click lan nua de thoat", Toast.LENGTH_SHORT).show()
+        Handler().postDelayed(Runnable { doubleBackToExitPressedOnce = false }, 2000)
     }
 }
