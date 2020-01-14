@@ -79,6 +79,7 @@ class MainActivity : AppCompatActivity() {
             editname = roomOptionView.findViewById(R.id.editTextNameUser) as EditText
             roomOptionView.buttonCreate.setOnClickListener {
                 mSocket.emit("client-create",editname.text)
+                mAlertDialog.dismiss()
 
             }
             roomOptionView.buttonJoinRoom.setOnClickListener {
@@ -91,6 +92,8 @@ class MainActivity : AppCompatActivity() {
 
                 Log.e("CONG", spinner.selectedItem.toString())
                 mSocket.emit("joinRoom", obj)
+                mAlertDialog.dismiss()
+
             }
             roomOptionView.buttonCancel.setOnClickListener {
                 mAlertDialog.dismiss()
@@ -152,6 +155,7 @@ class MainActivity : AppCompatActivity() {
                 intents.putExtra("id", spinner.selectedItem.toString())
                 intents.putExtra("name", editname.text.toString())
                 startActivity(intents)
+
             } catch (e: JSONException) {
                 return@Runnable
             }

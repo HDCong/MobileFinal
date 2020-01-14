@@ -26,13 +26,13 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
     var rooomid = ""
     //    var str =""
     var countResponse = 0
-    var totalScore :Long = 0
-    var time :Long = 0
-    var username =""
-    lateinit var listUser : ArrayList<User>
+    var totalScore: Long = 0
+    var time: Long = 0
+    var username = ""
+    lateinit var listUser: ArrayList<User>
     var solution = ""
     var urlPic = ""
-    var round = 1
+    var round = 0
     var currentIdx = 0
     var userSolution = ""
     val secureRandom = SecureRandom()
@@ -41,16 +41,15 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
     lateinit var buttonStart: Button
     lateinit var listViewPlayer: ListView
     lateinit var t: List<String>
-
+    var timer = timer(30000, 1000)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_play_online)
 
         flag = intent.extras?.getInt("flag") as Int
         rooomid = intent.extras?.getString("id") as String
-        username =intent.extras?.getString("name") as String
+        username = intent.extras?.getString("name") as String
 
-//        Log.e("CONG", str)
         connectToSocket()
         createWaitingView()
 
@@ -59,8 +58,25 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         mSocket.on("updatePoint", updatePoint)
 
         mSocket.on("listPlayer", getListPlayer)
-
     }
+
+    // Method to configure and return an instance of CountDownTimer object
+    private fun timer(millisInFuture: Long, countDownInterval: Long): CountDownTimer {
+        return object : CountDownTimer(millisInFuture, countDownInterval) {
+            override fun onTick(millisUntilFinished: Long) {
+                textViewCountDown.setText("Còn lại: " + millisUntilFinished / 1000)
+                time = millisUntilFinished
+            }
+
+            override fun onFinish() {
+                textViewCountDown.setText("Hết giờ")
+                time = 0
+//                round++
+                mSocket.emit("start-game",rooomid,round)
+            }
+        }
+    }
+
 
     @SuppressLint("ResourceType")
     private fun createWaitingView() {
@@ -104,26 +120,25 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
+    private fun resetCountDowntimer() {
+
+        timer.cancel()
+        timer.start()
+
+    }
+
     private val getQuestionFromServer = Emitter.Listener { args ->
         runOnUiThread(Runnable {
             val data = args[0] as JSONObject
             try {
-                Log.e("CONG1", t.toString())
                 urlPic = data.getString("url")
                 solution = data.getString("sol")
                 solution = solution.toUpperCase()
-
-                for (i in 0 until t.size){
-                    listUser = ArrayList<User>()
-                    listUser.add(User(t[i],0))
-
-                }
+                round = data.getInt("rou")
 
                 removeView()
-
+                linearButton.visibility=View.VISIBLE
                 initView()
-//                Log.e("CONG", listUser.toString())
-
             } catch (e: JSONException) {
                 return@Runnable
             }
@@ -132,17 +147,31 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
 
     private val updatePoint = Emitter.Listener { args ->
         runOnUiThread(Runnable {
+            Log.e("Vao update point")
             val data = args[0] as JSONObject
             try {
                 val name = data.getString("user")
                 val newpoint = data.getString("point")
                 val pointnew = newpoint.toLong()
-                for ( i in 0 until listUser.size){
-                    if(name == listUser[i].userName){
-                        listUser[i].totalPoint= pointnew
+                for (i in 0 until listUser.size) {
+                    if (name == listUser[i].userName) {
+                        listUser[i].totalPoint = pointnew
                     }
+                    Log.e("CONG-Point",listUser[i].userName +"- " + listUser[i].totalPoint.toString())
                 }
+
                 countResponse++
+                Log.e("CONG", "count: " + countResponse.toString())
+                if (countResponse == listUser.size + 1) {
+
+                    countResponse=0
+
+                    mSocket.emit("start-game", rooomid,round)
+
+                    removeView()
+
+                    initView()
+                }
 
             } catch (e: JSONException) {
                 return@Runnable
@@ -169,6 +198,10 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                         android.R.layout.simple_list_item_1, t
                     )
                     listViewPlayer.adapter = adapter
+                    listUser = ArrayList<User>()
+                    for (i in 0 until t.size) {
+                        listUser.add(User(t[i], 0))
+                    }
                 }
             } catch (e: JSONException) {
                 return@Runnable
@@ -199,16 +232,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         val imageViewPicture = ImageView(this)
         Picasso.with(this).load(urlPic).into(imageViewPicture)
         layoutPictureQuestion.addView(imageViewPicture)
-        object : CountDownTimer(60000, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                textViewCountDown.setText("Còn lại: " + millisUntilFinished / 1000)
-                time = millisUntilFinished
-            }
-            override fun onFinish() {
-                textViewCountDown.setText("Hết giờ")
-                time = 0
-            }
-        }.start()
+        resetCountDowntimer()
     }
 
     fun randomQuestions(): ArrayList<String> {
@@ -286,19 +310,11 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         var button = v as Button
         if (v.id == 8988) {
-            mSocket.emit("start-game", rooomid)
-            layoutPictureQuestion.removeAllViews()
+            mSocket.emit("start-game", rooomid,round)
+            Log.e("CONG", "START GAME")
             return
         }
-        var ts :Long = 0
-        if(time==ts){
-            val obj = JSONObject()
-            obj.put("roomID", rooomid)
-            obj.put("username", username)
-            obj.put("point", totalScore)
-            mSocket.emit("receive",obj)
-            return
-        }
+
         if (currentIdx >= myButtons.size) return
         myButtons[currentIdx].text = button.text
         userSolution += button.text
@@ -314,8 +330,8 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 textViewResult.text = "Đúng rồi"
                 textViewResult.visibility = View.VISIBLE
-                totalScore+=time
-             } else {
+                totalScore += time
+            } else {
                 for (i in 0..solution.length - 1) {
                     myButtons[i].setBackgroundResource(R.drawable.tile_false)
                 }
@@ -323,11 +339,12 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                 textViewResult.visibility = View.VISIBLE
 
             }
+            Log.e("CONG", "vao receive")
             val obj = JSONObject()
             obj.put("roomID", rooomid)
             obj.put("username", username)
             obj.put("point", totalScore)
-            mSocket.emit("receive",obj)
+            mSocket.emit("receive", obj)
         }
     }
 
