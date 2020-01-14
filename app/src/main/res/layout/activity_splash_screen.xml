@@ -12,7 +12,7 @@
         android:layout_width="128dp"
         android:layout_height="128dp"
         android:layout_centerInParent="true"
-        android:background="@drawable/appicon"
+        android:background="@drawable/splash"
         android:id="@+id/splashIcon"/>
 
     <com.agrawalsuneet.dotsloader.loaders.TashieLoader

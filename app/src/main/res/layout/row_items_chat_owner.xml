@@ -19,7 +19,7 @@
         android:textSize="18sp"
         android:layout_marginLeft="100dp"
         android:layout_marginRight="15dp"
-        android:layout_marginVertical="15dp"
+        android:layout_marginVertical="8dp"
         android:padding="8dp"
         android:background="#1E90FF"
         android:layout_below="@id/textViewName"/>

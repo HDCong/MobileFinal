@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
 
             var width = displayMetrics.widthPixels
             var height = displayMetrics.heightPixels
-            mAlertDialog.getWindow()?.setLayout((width*0.9).toInt(), (height*0.9).toInt()); //Controlling width and height.
+            mAlertDialog.getWindow()?.setLayout((width*0.9).toInt(), (height*0.7).toInt()); //Controlling width and height.
 
 
             editname = roomOptionView.findViewById(R.id.editTextNameUser) as EditText
