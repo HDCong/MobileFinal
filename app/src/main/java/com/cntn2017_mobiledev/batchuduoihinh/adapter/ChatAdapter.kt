@@ -42,20 +42,16 @@ class ChatAdapter(context: Context) : BaseAdapter() {
 
         return view
     }
-
     fun setItem(list: ArrayList<Chat>) {
         this.items = list
         notifyDataSetChanged()
     }
-
     override fun getItem(p0: Int): Any {
         return items.get(p0)
     }
-
     override fun getCount(): Int {
         return items.size
     }
-
     override fun getItemId(p0: Int): Long {
         return p0.toLong()
     }

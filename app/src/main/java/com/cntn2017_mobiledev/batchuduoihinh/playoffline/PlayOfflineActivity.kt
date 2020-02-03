@@ -1,5 +1,6 @@
 package com.cntn2017_mobiledev.batchuduoihinh.playoffline
 
+import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
 import android.util.DisplayMetrics
@@ -145,10 +146,13 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
         var width = displayMetrics.widthPixels
         // For the first row
         for (i in 0..7) {
+
             val btn = Button(this) // tao nut
             btn.layoutParams = LinearLayout.LayoutParams((width - 50) / 8, 150) // set layout
             btn.setBackgroundResource(R.drawable.tile_hover) // set back ground
             btn.setOnClickListener(this) // set on click listener
+            val font = Typeface.createFromAsset(assets,"fonts/pacifo.ttf")
+            btn.setTypeface(font)
             while (btn.text === "") {
                 val tmp: Int = secureRandom.nextInt(16)
                 if (check(arraySolution, tmp)) {
@@ -164,6 +168,8 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
             btn.layoutParams = LinearLayout.LayoutParams((width - 50) / 8, 150) // set layout
             btn.setBackgroundResource(R.drawable.tile_hover) // set back ground
             btn.setOnClickListener(this) // set on click listener
+            val font = Typeface.createFromAsset(assets,"fonts/pacifo.ttf")
+            btn.setTypeface(font)
             while (btn.text === "") {
                 val tmp: Int = secureRandom.nextInt(16)
                 if (check(arraySolution, tmp)) {
@@ -183,6 +189,8 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
             btn.id = 8515 + i
             btn.setBackgroundResource(R.drawable.word_button)
             layoutButtonAnswer.addView(btn)
+            val font = Typeface.createFromAsset(assets,"fonts/pacifo.ttf")
+            btn.setTypeface(font)
             myButtons.add(btn)
         }
     }
