@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Đuổi Hình Bắt Chữ</string>
+    <string name="serverAddress">https://chasing-word.herokuapp.com/</string>
+
+</resources>
