@@ -22,19 +22,15 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:fontFamily="@font/bubblegum_sans"
-            android:textSize="40sp" />
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/share"
-            android:layout_toRightOf="@id/textViewShowRound"
-            android:id="@+id/buttonShare" />
+            android:textSize="40sp"
+            android:layout_marginRight="10dp"/>
         <ImageView
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="@drawable/hint_icon"
-            android:layout_toRightOf="@id/buttonShare"
-            android:id="@+id/buttonHint" />
+            android:layout_alignParentRight="true"
+            android:id="@+id/buttonHint"
+            android:layout_marginRight="10dp"/>
 
     </RelativeLayout>
     <!--    Show picture-->
@@ -47,50 +43,73 @@
         android:orientation="horizontal">
         <ImageView
             android:id="@+id/imageViewPicture"
+            android:scaleType="fitXY"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="480px"
+            android:layout_margin="15dp"/>
 
     </LinearLayout>
-    <!--    Show answer-->
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1.5"
         android:gravity="center"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/textViewResult"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/atomic_age"
-            android:text=""
-            android:textColor="#000"
-            android:textSize="36sp"
-            android:textStyle="bold" />
+        android:layout_margin="5dp"
+        android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1.5"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/textViewResult"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/atomic_age"
+                android:text=""
+                android:textColor="#000"
+                android:textSize="36sp"
+                android:textStyle="bold" />
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/layoutButtonAnswer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_margin="8dp"
+                app:flexDirection="row"
+                app:flexWrap="wrap"
+                app:justifyContent="center">
+            </com.google.android.flexbox.FlexboxLayout>
 
         </LinearLayout>
-
-        <com.google.android.flexbox.FlexboxLayout
-            android:id="@+id/layoutButtonAnswer"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_margin="8dp"
-            app:flexDirection="row"
-            app:flexWrap="wrap"
-            app:justifyContent="center">
+            android:layout_weight="0.5"
+            android:orientation="vertical">
 
-        </com.google.android.flexbox.FlexboxLayout>
-
+            <Button
+                android:id="@+id/buttonShare"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/share"
+                android:layout_margin="20dp"
+                android:visibility="gone"/>
+            <Button
+                android:id="@+id/buttonSkip"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/skip"
+                android:layout_margin="20dp"
+                android:visibility="gone"/>
+        </LinearLayout>
     </LinearLayout>
-    <!--    Show pick button-->
+
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

@@ -22,8 +22,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="3"
             android:fontFamily="@font/alfa_slab_one"
-            android:text="Tốp"
-            android:textSize="40sp" />
+            android:text="Tốp đẹp zai"
+            android:textSize="35sp" />
 
         <TextView
             android:id="@+id/textViewCountDown"
@@ -65,7 +65,6 @@
             android:layout_weight="1.5"
             android:gravity="center"
             android:orientation="vertical">
-
             <TextView
                 android:id="@+id/textViewResult"
                 android:layout_width="wrap_content"
@@ -75,12 +74,6 @@
                 android:textColor="#000"
                 android:textSize="24sp"
                 android:textStyle="bold" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal"></LinearLayout>
 
             <com.google.android.flexbox.FlexboxLayout
                 android:id="@+id/layoutButtonAnswer"
@@ -94,7 +87,6 @@
 
             </com.google.android.flexbox.FlexboxLayout>
         </LinearLayout>
-
         <LinearLayout
             android:id="@+id/linearButton"
             android:layout_width="wrap_content"

@@ -22,6 +22,7 @@ import com.github.nkzawa.emitter.Emitter
 import com.github.nkzawa.socketio.client.IO
 import com.github.nkzawa.socketio.client.Socket
 import com.squareup.picasso.Picasso
+import jp.wasabeef.picasso.transformations.RoundedCornersTransformation
 import kotlinx.android.synthetic.main.activity_play_online.*
 import kotlinx.android.synthetic.main.chat_layout.view.*
 import org.json.JSONException
@@ -35,6 +36,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
     lateinit var mSocket: Socket
     var flag = 0
     var rooomid = ""
+    var isNotStarted = true
     //    var str =""
     var countResponse = 0
     var totalScore: Long = 0
@@ -325,7 +327,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                 t = s.split(",")
                 Log.e("CONG", t.toString())
 
-                if (t != null) {
+                if (t != null && isNotStarted) {
                     val adapter = ArrayAdapter(
                         this,
                         android.R.layout.simple_list_item_1, t
@@ -399,7 +401,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun createImageViewQuestion() {
         val imageViewPicture = ImageView(this)
-        Picasso.with(this).load(urlPic).into(imageViewPicture)
+        Picasso.with(this).load(urlPic).transform(RoundedCornersTransformation(80,10)).into(imageViewPicture)
         layoutPictureQuestion.addView(imageViewPicture)
         buttonHintOnl.visibility = View.VISIBLE
         resetCountDowntimer()
@@ -493,6 +495,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
             } else {
                 Toast.makeText(this, "Đang đợi người chơi vào", Toast.LENGTH_SHORT).show()
             }
+            isNotStarted= false
             return
 
         }

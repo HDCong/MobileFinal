@@ -1,7 +1,14 @@
 package com.cntn2017_mobiledev.batchuduoihinh.playoffline
 
+import android.Manifest
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Typeface
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.util.DisplayMetrics
 import android.util.Log
@@ -10,14 +17,28 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
+import com.cntn2017_mobiledev.batchuduoihinh.BuildConfig
 import com.cntn2017_mobiledev.batchuduoihinh.R
 import com.github.nkzawa.emitter.Emitter
 import com.github.nkzawa.socketio.client.IO
 import com.github.nkzawa.socketio.client.Socket
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.MultiplePermissionsReport
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.DexterError
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.PermissionRequestErrorListener
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.squareup.picasso.Picasso
+import jp.wasabeef.picasso.transformations.CropCircleTransformation
+import jp.wasabeef.picasso.transformations.RoundedCornersTransformation
 import kotlinx.android.synthetic.main.activity_play_offline.*
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.File
+import java.io.FileOutputStream
+import java.lang.Exception
 import java.net.URISyntaxException
 import java.security.SecureRandom
 
@@ -40,6 +61,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
         setContentView(R.layout.activity_play_offline)
 
         connectToSocket()
+        requestReadPermissions()
 
         getQuestionAndAnswer()
         mSocket.on("QuestionNek", getQuestionFromServer)
@@ -53,8 +75,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
             if (help > 0) {
                 if (currentIdx >= solution.length - 1) {
                     Toast.makeText(this, "Còn chữ cuối tự đoán đi :)", Toast.LENGTH_SHORT).show()
-                }
-                else {
+                } else {
                     myButtons[currentIdx].text = solution[currentIdx].toString()
                     userSolution += solution[currentIdx].toString()
                     currentIdx++
@@ -69,18 +90,91 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
 
         buttonShare.setOnClickListener {
             takeScreenShot()
-            shareIntent()
         }
+        buttonSkip.setOnClickListener {
+            removeView()
+            getQuestionAndAnswer()
+        }
+
     }
 
-    private fun shareIntent() {
-
-
-    }
 
     private fun takeScreenShot() {
 
+        try {
 
+            val mPath =
+                Environment.getExternalStorageDirectory().absolutePath.toString()+ "/"+"CW_17TN" + ".jpeg"
+            // create bitmap screen capture
+            val v1 = window.decorView.rootView
+            v1.isDrawingCacheEnabled = true
+            val bitmap = Bitmap.createBitmap(v1.drawingCache)
+            v1.isDrawingCacheEnabled = false
+            val imageFile = File(mPath)
+
+            val outputStream = FileOutputStream(imageFile)
+            val quality = 100
+            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
+            outputStream.flush()
+            outputStream.close()
+            //setting screenshot in imageview
+            val filePath = imageFile.path
+            Log.e("Cong", filePath)
+            shareIntent(filePath)
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    private fun shareIntent(sharePath: String) {
+        val file = File(sharePath)
+        lateinit var uri : Uri
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", file);
+        } else {
+            uri = Uri.fromFile(file);
+        }
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.type = "image/*"
+        intent.putExtra(Intent.EXTRA_STREAM, uri)
+        startActivity(intent)
+    }
+
+    private fun requestReadPermissions() {
+
+        Dexter.withActivity(this)
+            .withPermissions(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            .withListener(object : MultiplePermissionsListener {
+                override fun onPermissionsChecked(report: MultiplePermissionsReport) {
+                    // check if all permissions are granted
+                    if (report.areAllPermissionsGranted()) {
+
+                    }
+
+                    // check for permanent denial of any permission
+                    if (report.isAnyPermissionPermanentlyDenied) {
+                        // show alert dialog navigating to Settings
+                        //openSettingsDialog();
+                    }
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permissions: List<PermissionRequest>,
+                    token: PermissionToken
+                ) {
+                    token.continuePermissionRequest()
+                }
+            }).withErrorListener(object : PermissionRequestErrorListener {
+                override fun onError(error: DexterError) {
+                    Toast.makeText(applicationContext, "Some Error! ", Toast.LENGTH_SHORT).show()
+                }
+            })
+            .onSameThread()
+            .check()
     }
 
     private fun connectToSocket() {
@@ -117,6 +211,9 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
         createButtonToSelect()
         // The selected
         createSelectedButton()
+        buttonShare.visibility= View.VISIBLE
+        buttonSkip.visibility= View.VISIBLE
+
     }
 
     private fun getQuestionAndAnswer() {
@@ -129,7 +226,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun createImageViewQuestion() {
-        Picasso.with(this).load(urlPic).into(imageViewPicture)
+        Picasso.with(this).load(urlPic).transform(RoundedCornersTransformation(80,5)).into(imageViewPicture)
     }
 
     fun randomQuestions(): ArrayList<String> {
@@ -141,7 +238,6 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
         for (i in 0 until 16 - solution.length) {
             arrS.add(tm.toChar() + "")
         }
-//        Log.e("CONG", arrS.toString())
         return arrS
     }
 
@@ -165,7 +261,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
             val btn = Button(this) // tao nut
             btn.layoutParams = LinearLayout.LayoutParams((width - 50) / 8, 150) // set layout
             btn.setBackgroundResource(R.drawable.btn_choose) // set back ground
-            val font = Typeface.createFromAsset(assets,"fonts/pacifo.ttf")
+            val font = Typeface.createFromAsset(assets, "fonts/pacifo.ttf")
             btn.setTypeface(font)
             btn.setOnClickListener(this) // set on click listener
             while (btn.text === "") {
@@ -182,7 +278,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
             val btn = Button(this) // tao nut
             btn.layoutParams = LinearLayout.LayoutParams((width - 50) / 8, 150) // set layout
             btn.setBackgroundResource(R.drawable.btn_choose) // set back ground
-            val font = Typeface.createFromAsset(assets,"fonts/pacifo.ttf")
+            val font = Typeface.createFromAsset(assets, "fonts/pacifo.ttf")
             btn.setTypeface(font)
             btn.setOnClickListener(this) // set on click listener
             while (btn.text === "") {
@@ -200,10 +296,10 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
     private fun createSelectedButton() {
         for (i in 0 until solution.length) {
             var btn = Button(this)
-            btn.layoutParams = LinearLayout.LayoutParams(120, 120)
+            btn.layoutParams = LinearLayout.LayoutParams(110, 110)
             btn.id = 8515 + i
             btn.setBackgroundResource(R.drawable.word_button)
-            val font = Typeface.createFromAsset(assets,"fonts/pacifo.ttf")
+            val font = Typeface.createFromAsset(assets, "fonts/pacifo.ttf")
             btn.setTypeface(font)
             layoutButtonAnswer.addView(btn)
             myButtons.add(btn)
@@ -221,8 +317,6 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
         countSelected++
 
         if (countSelected == solution.length) {
-//            layoutButtonSelectFirst.isEnabled=false
-//            layoutButtonSelectSecond.isEnabled=false
 
             if (userSolution == solution) {
                 for (i in 0..solution.length - 1) {
@@ -252,9 +346,6 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
                     2000 // value in milliseconds
                 )
             }
-//            layoutButtonSelectFirst.isEnabled=true
-//            layoutButtonSelectSecond.isEnabled=true
-
         }
     }
 
