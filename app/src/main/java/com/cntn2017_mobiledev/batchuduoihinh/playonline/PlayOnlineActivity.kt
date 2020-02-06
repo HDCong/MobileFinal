@@ -161,7 +161,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
 
         buttonHintOnl.setOnClickListener {
             if (totalScore > 1000) {
-                if (currentIdx == solution.length - 2) {
+                if (currentIdx == solution.length - 1) {
                     Toast.makeText(this, "Còn chữ cuối tự đoán đi :)", Toast.LENGTH_SHORT).show()
 
                 } else {
@@ -204,6 +204,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
             buttonStart.text = "Bắt đầu"
             buttonStart.setOnClickListener(this)
             buttonStart.setId(8988)
+            buttonStart.setBackgroundResource(R.drawable.shape_button)
             buttonStart.setLayoutParams(
                 TableLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -437,7 +438,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         for (i in 0..7) {
             val btn = Button(this) // tao nut
             btn.layoutParams = LinearLayout.LayoutParams((width - 50) / 8, 150) // set layout
-            btn.setBackgroundResource(R.drawable.tile_hover) // set back ground
+            btn.setBackgroundResource(R.drawable.btn_choose) // set back ground
             val font = Typeface.createFromAsset(assets,"fonts/pacifo.ttf")
             btn.setTypeface(font)
             btn.setOnClickListener(this) // set on click listener
@@ -454,7 +455,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         for (i in 0..7) {
             val btn = Button(this) // tao nut
             btn.layoutParams = LinearLayout.LayoutParams((width - 50) / 8, 150) // set layout
-            btn.setBackgroundResource(R.drawable.tile_hover) // set back ground
+            btn.setBackgroundResource(R.drawable.btn_choose) // set back ground
             val font = Typeface.createFromAsset(assets,"fonts/pacifo.ttf")
             btn.setTypeface(font)
             btn.setOnClickListener(this) // set on click listener
@@ -490,7 +491,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                 mSocket.emit("start-game", rooomid, round)
                 Log.e("CONG", "START GAME")
             } else {
-                Toast.makeText(this, "Đợi người vô chơi đi ba", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Đang đợi người chơi vào", Toast.LENGTH_SHORT).show()
             }
             return
 
@@ -507,14 +508,14 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
             Log.e("CONG", "bang rui nek")
             if (userSolution == solution) {
                 for (i in 0..solution.length - 1) {
-                    myButtons[i].setBackgroundResource(R.drawable.tile_true)
+                    myButtons[i].setBackgroundResource(R.drawable.btn_true)
                 }
                 textViewResult.text = "Đúng rồi"
                 textViewResult.visibility = View.VISIBLE
                 totalScore += time
             } else {
                 for (i in 0..solution.length - 1) {
-                    myButtons[i].setBackgroundResource(R.drawable.tile_false)
+                    myButtons[i].setBackgroundResource(R.drawable.btn_false)
                 }
                 textViewResult.text = "Sai rồi"
                 textViewResult.visibility = View.VISIBLE

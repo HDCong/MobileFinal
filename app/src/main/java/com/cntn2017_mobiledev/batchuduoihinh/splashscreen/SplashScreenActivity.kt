@@ -7,6 +7,7 @@ import android.os.Handler
 import android.widget.Toast
 import com.cntn2017_mobiledev.batchuduoihinh.R
 import com.cntn2017_mobiledev.batchuduoihinh.extension.openWithFadeInAnimation
+import com.cntn2017_mobiledev.batchuduoihinh.extension.openWithFadeInAnimation2
 import com.cntn2017_mobiledev.batchuduoihinh.home.MainActivity
 
 class SplashScreenActivity : AppCompatActivity() {
@@ -19,7 +20,7 @@ class SplashScreenActivity : AppCompatActivity() {
                 val intent = Intent(this, MainActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
-                openWithFadeInAnimation()
+                openWithFadeInAnimation2()
                 finish();
         }, 3000)
     }

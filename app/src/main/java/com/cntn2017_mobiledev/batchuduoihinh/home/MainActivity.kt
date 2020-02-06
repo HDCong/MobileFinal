@@ -16,6 +16,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import com.cntn2017_mobiledev.batchuduoihinh.R
+import com.cntn2017_mobiledev.batchuduoihinh.extension.openWithFadeInAnimation
+import com.cntn2017_mobiledev.batchuduoihinh.extension.openWithFadeInAnimation2
 import com.cntn2017_mobiledev.batchuduoihinh.playoffline.PlayOfflineActivity
 import com.cntn2017_mobiledev.batchuduoihinh.playonline.PlayOnlineActivity
 import com.github.nkzawa.emitter.Emitter
@@ -76,7 +78,10 @@ class MainActivity : AppCompatActivity() {
         buttonOffline.setOnClickListener {
             Log.e("CONG", "offline clicked")
             val intent = Intent(this, PlayOfflineActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
+            openWithFadeInAnimation()
+//            finish();
 
         }
         buttonOnline.setOnClickListener {
@@ -215,7 +220,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
         this.doubleBackToExitPressedOnce = true
-        Toast.makeText(this,"Click lan nua de thoat",Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Click lần nữa để thoát", Toast.LENGTH_SHORT).show()
         Handler().postDelayed(Runnable { doubleBackToExitPressedOnce = false }, 2000)
     }
 }

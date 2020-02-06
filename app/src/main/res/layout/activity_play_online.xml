@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#87CEFA"
+    android:background="@drawable/gradient_playgame"
     tools:context=".playonline.PlayOnlineActivity">
     <!--    Show round -->
 
@@ -21,7 +21,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3"
-            android:fontFamily="@font/bubblegum_sans"
+            android:fontFamily="@font/alfa_slab_one"
+            android:text="Tốp"
             android:textSize="40sp" />
 
         <TextView

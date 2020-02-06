@@ -66,6 +66,21 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
                     .show()
             }
         }
+
+        buttonShare.setOnClickListener {
+            takeScreenShot()
+            shareIntent()
+        }
+    }
+
+    private fun shareIntent() {
+
+
+    }
+
+    private fun takeScreenShot() {
+
+
     }
 
     private fun connectToSocket() {
@@ -149,7 +164,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
         for (i in 0..7) {
             val btn = Button(this) // tao nut
             btn.layoutParams = LinearLayout.LayoutParams((width - 50) / 8, 150) // set layout
-            btn.setBackgroundResource(R.drawable.tile_hover) // set back ground
+            btn.setBackgroundResource(R.drawable.btn_choose) // set back ground
             val font = Typeface.createFromAsset(assets,"fonts/pacifo.ttf")
             btn.setTypeface(font)
             btn.setOnClickListener(this) // set on click listener
@@ -166,7 +181,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
         for (i in 0..7) {
             val btn = Button(this) // tao nut
             btn.layoutParams = LinearLayout.LayoutParams((width - 50) / 8, 150) // set layout
-            btn.setBackgroundResource(R.drawable.tile_hover) // set back ground
+            btn.setBackgroundResource(R.drawable.btn_choose) // set back ground
             val font = Typeface.createFromAsset(assets,"fonts/pacifo.ttf")
             btn.setTypeface(font)
             btn.setOnClickListener(this) // set on click listener
@@ -211,7 +226,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
 
             if (userSolution == solution) {
                 for (i in 0..solution.length - 1) {
-                    myButtons[i].setBackgroundResource(R.drawable.tile_true)
+                    myButtons[i].setBackgroundResource(R.drawable.btn_true)
                 }
                 textViewResult.text = "Đúng rồi"
                 textViewResult.visibility = View.VISIBLE
@@ -225,7 +240,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
                 )
             } else {
                 for (i in 0..solution.length - 1) {
-                    myButtons[i].setBackgroundResource(R.drawable.tile_false)
+                    myButtons[i].setBackgroundResource(R.drawable.btn_false)
                 }
                 textViewResult.text = "Sai rồi"
                 textViewResult.visibility = View.VISIBLE
