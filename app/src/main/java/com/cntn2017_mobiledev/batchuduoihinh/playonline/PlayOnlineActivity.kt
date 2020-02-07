@@ -1,7 +1,9 @@
 package com.cntn2017_mobiledev.batchuduoihinh.playonline
 
 import android.annotation.SuppressLint
+import android.app.ActionBar
 import android.graphics.Typeface
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
@@ -10,9 +12,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.marginLeft
 import com.cntn2017_mobiledev.batchuduoihinh.*
 import com.cntn2017_mobiledev.batchuduoihinh.adapter.ChatAdapter
 import com.cntn2017_mobiledev.batchuduoihinh.adapter.RankingAdapter
@@ -23,7 +27,15 @@ import com.github.nkzawa.socketio.client.IO
 import com.github.nkzawa.socketio.client.Socket
 import com.squareup.picasso.Picasso
 import jp.wasabeef.picasso.transformations.RoundedCornersTransformation
+import kotlinx.android.synthetic.main.activity_play_offline.*
 import kotlinx.android.synthetic.main.activity_play_online.*
+import kotlinx.android.synthetic.main.activity_play_online.buttonSound
+import kotlinx.android.synthetic.main.activity_play_online.layoutButtonAnswer
+import kotlinx.android.synthetic.main.activity_play_online.layoutButtonSelectFirst
+import kotlinx.android.synthetic.main.activity_play_online.layoutButtonSelectSecond
+import kotlinx.android.synthetic.main.activity_play_online.layoutPictureQuestion
+import kotlinx.android.synthetic.main.activity_play_online.textViewResult
+import kotlinx.android.synthetic.main.activity_play_online.textViewShowRound
 import kotlinx.android.synthetic.main.chat_layout.view.*
 import org.json.JSONException
 import org.json.JSONObject
@@ -33,6 +45,8 @@ import java.security.SecureRandom
 
 class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
     var doubleBackToExitPressedOnce = false
+    var isMute = false
+    lateinit var mPlayer: MediaPlayer
     lateinit var mSocket: Socket
     var flag = 0
     var rooomid = ""
@@ -105,6 +119,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         chatAdapter =
             ChatAdapter(this)
 
+        mPlayer = MediaPlayer.create(this, R.raw.correct)
 
         mSocket.on("question", getQuestionFromServer)
 
@@ -113,6 +128,8 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         mSocket.on("listPlayer", getListPlayer)
 
         mSocket.on("chatResponse", onChatResponse)
+
+        mSocket.on("close", closeRoom)
 
     }
 
@@ -167,14 +184,27 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                     Toast.makeText(this, "Còn chữ cuối tự đoán đi :)", Toast.LENGTH_SHORT).show()
 
                 } else {
-                    myButtons[currentIdx].text = solution[currentIdx].toString()
-                    userSolution += solution[currentIdx].toString()
-                    currentIdx++
-                    countSelected++
-                    totalScore -= 1000
+                    if(currentIdx!=solution.length){
+                        myButtons[currentIdx].text = solution[currentIdx].toString()
+                        userSolution += solution[currentIdx].toString()
+                        currentIdx++
+                        countSelected++
+                        totalScore -= 1000
+                    }
+
                 }
             } else {
                 Toast.makeText(this, "Số điểm ít hơn 1000", Toast.LENGTH_SHORT).show()
+            }
+        }
+        buttonSound.setOnClickListener {
+            if(isMute){
+                isMute = false
+                buttonSound.setBackgroundResource(R.drawable.speaker)
+            }
+            else{
+                isMute=true
+                buttonSound.setBackgroundResource(R.drawable.mute)
             }
         }
     }
@@ -199,7 +229,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
 
     @SuppressLint("ResourceType")
     private fun createWaitingView() {
-        textViewShowRound.text = "Đang Đợi"
+        textViewShowRound.text = "#" + rooomid +": Đang Đợi"
         if (flag == 1) {
             buttonStart = Button(this)
             buttonStart.setLayoutParams(LinearLayout.LayoutParams(450, 150))
@@ -379,6 +409,14 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
             }
         })
     }
+    private val closeRoom = Emitter.Listener { args ->
+        runOnUiThread(Runnable {
+            Log.e("CONG", "VAO chat close room")
+            if (flag==0)
+                Toast.makeText(this, "Chủ phòng đã thoát", Toast.LENGTH_SHORT).show()
+            this.finish()
+        })
+    }
 
     private fun initView() {
 
@@ -389,6 +427,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
         createButtonToSelect()
         // The selected
         createSelectedButton()
+        buttonHintOnl.isClickable=true
     }
 
     private fun getQuestionAndAnswer() {
@@ -401,9 +440,15 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun createImageViewQuestion() {
         val imageViewPicture = ImageView(this)
-        Picasso.with(this).load(urlPic).transform(RoundedCornersTransformation(80,10)).into(imageViewPicture)
+        imageViewPicture.layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, 480).also {
+            it.setMargins(25, 25, 25, 25)
+        }
+        imageViewPicture.scaleType = ImageView.ScaleType.FIT_XY
+        Picasso.with(this).load(urlPic).transform(RoundedCornersTransformation(80, 5))
+            .into(imageViewPicture)
         layoutPictureQuestion.addView(imageViewPicture)
         buttonHintOnl.visibility = View.VISIBLE
+        buttonSound.visibility= View.VISIBLE
         resetCountDowntimer()
         countResponse = 0
     }
@@ -441,7 +486,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
             val btn = Button(this) // tao nut
             btn.layoutParams = LinearLayout.LayoutParams((width - 50) / 8, 150) // set layout
             btn.setBackgroundResource(R.drawable.btn_choose) // set back ground
-            val font = Typeface.createFromAsset(assets,"fonts/pacifo.ttf")
+            val font = Typeface.createFromAsset(assets, "fonts/pacifo.ttf")
             btn.setTypeface(font)
             btn.setOnClickListener(this) // set on click listener
             while (btn.text === "") {
@@ -458,7 +503,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
             val btn = Button(this) // tao nut
             btn.layoutParams = LinearLayout.LayoutParams((width - 50) / 8, 150) // set layout
             btn.setBackgroundResource(R.drawable.btn_choose) // set back ground
-            val font = Typeface.createFromAsset(assets,"fonts/pacifo.ttf")
+            val font = Typeface.createFromAsset(assets, "fonts/pacifo.ttf")
             btn.setTypeface(font)
             btn.setOnClickListener(this) // set on click listener
             while (btn.text === "") {
@@ -479,7 +524,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
             btn.layoutParams = LinearLayout.LayoutParams(120, 120)
             btn.id = 8515 + i
             btn.setBackgroundResource(R.drawable.word_button)
-            val font = Typeface.createFromAsset(assets,"fonts/pacifo.ttf")
+            val font = Typeface.createFromAsset(assets, "fonts/pacifo.ttf")
             btn.setTypeface(font)
             layoutButtonAnswer.addView(btn)
             myButtons.add(btn)
@@ -495,12 +540,15 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
             } else {
                 Toast.makeText(this, "Đang đợi người chơi vào", Toast.LENGTH_SHORT).show()
             }
-            isNotStarted= false
+            isNotStarted = false
             return
 
         }
 
-        if (currentIdx >= myButtons.size) return
+        if (currentIdx >= myButtons.size){
+            buttonHintOnl.isClickable=false
+            return
+        }
         myButtons[currentIdx].text = button.text
         userSolution += button.text
         currentIdx++
@@ -513,12 +561,22 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
                 for (i in 0..solution.length - 1) {
                     myButtons[i].setBackgroundResource(R.drawable.btn_true)
                 }
+                if (mPlayer != null && isMute==false) {
+                    mPlayer.release()
+                    mPlayer = MediaPlayer.create(this, R.raw.correct)
+                    mPlayer.start()
+                }
                 textViewResult.text = "Đúng rồi"
                 textViewResult.visibility = View.VISIBLE
                 totalScore += time
             } else {
                 for (i in 0..solution.length - 1) {
                     myButtons[i].setBackgroundResource(R.drawable.btn_false)
+                }
+                if (mPlayer != null && isMute==false) {
+                    mPlayer.release()
+                    mPlayer = MediaPlayer.create(this, R.raw.incorrect)
+                    mPlayer.start()
                 }
                 textViewResult.text = "Sai rồi"
                 textViewResult.visibility = View.VISIBLE
@@ -549,9 +607,13 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onBackPressed() {
         if (doubleBackToExitPressedOnce) {
-            mSocket.emit("removePlayer", rooomid, username)
-            Log.e("CONG-", "remove nek")
-
+            if (isNotStarted) {
+                mSocket.emit("removePlayer", rooomid, username)
+                Log.e("CONG-", "remove nek")
+                if (flag == 1) {
+                    mSocket.emit("closeRoom", rooomid)
+                }
+            }
             super.onBackPressed()
             return
         }

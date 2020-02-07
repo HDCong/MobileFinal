@@ -174,6 +174,7 @@ class MainActivity : AppCompatActivity() {
                 intents.putExtra("flag", 1)
                 intents.putExtra("id", data.getString("roomid"))
                 intents.putExtra("name", editname.text.toString())
+                editname.setText("")
                 startActivity(intents)
             } catch (e: JSONException) {
                 return@Runnable
@@ -191,6 +192,7 @@ class MainActivity : AppCompatActivity() {
                 intents.putExtra("flag", 0)
                 intents.putExtra("id", spinner.selectedItem.toString())
                 intents.putExtra("name", editname.text.toString())
+                editname.setText("")
                 startActivity(intents)
 
             } catch (e: JSONException) {

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Typeface
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -44,8 +45,9 @@ import java.security.SecureRandom
 
 
 class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
+    var isMute = false
     var doubleBackToExitPressedOnce = false
-
+    lateinit var mPlayer: MediaPlayer
     lateinit var mSocket: Socket
     var help = 3
     var solution = ""
@@ -66,6 +68,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
         getQuestionAndAnswer()
         mSocket.on("QuestionNek", getQuestionFromServer)
 
+        mPlayer = MediaPlayer.create(this, R.raw.correct)
         registerView()
     }
 
@@ -95,6 +98,16 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
             removeView()
             getQuestionAndAnswer()
         }
+        buttonSound.setOnClickListener {
+            if(isMute){
+                isMute = false
+                buttonSound.setBackgroundResource(R.drawable.speaker)
+            }
+            else{
+                isMute=true
+                buttonSound.setBackgroundResource(R.drawable.mute)
+            }
+        }
 
     }
 
@@ -102,9 +115,9 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
     private fun takeScreenShot() {
 
         try {
-
+            requestReadPermissions()
             val mPath =
-                Environment.getExternalStorageDirectory().absolutePath.toString()+ "/"+"CW_17TN" + ".jpeg"
+                Environment.getExternalStorageDirectory().absolutePath.toString() + "/" + "CW_17TN" + ".jpeg"
             // create bitmap screen capture
             val v1 = window.decorView.rootView
             v1.isDrawingCacheEnabled = true
@@ -128,9 +141,13 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun shareIntent(sharePath: String) {
         val file = File(sharePath)
-        lateinit var uri : Uri
+        lateinit var uri: Uri
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", file);
+            uri = FileProvider.getUriForFile(
+                this,
+                BuildConfig.APPLICATION_ID + ".fileprovider",
+                file
+            );
         } else {
             uri = Uri.fromFile(file);
         }
@@ -211,8 +228,8 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
         createButtonToSelect()
         // The selected
         createSelectedButton()
-        buttonShare.visibility= View.VISIBLE
-        buttonSkip.visibility= View.VISIBLE
+        buttonShare.visibility = View.VISIBLE
+        buttonSkip.visibility = View.VISIBLE
 
     }
 
@@ -226,7 +243,8 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun createImageViewQuestion() {
-        Picasso.with(this).load(urlPic).transform(RoundedCornersTransformation(80,5)).into(imageViewPicture)
+        Picasso.with(this).load(urlPic).transform(RoundedCornersTransformation(80, 5))
+            .into(imageViewPicture)
     }
 
     fun randomQuestions(): ArrayList<String> {
@@ -322,6 +340,11 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
                 for (i in 0..solution.length - 1) {
                     myButtons[i].setBackgroundResource(R.drawable.btn_true)
                 }
+                if (mPlayer != null && isMute==false) {
+                    mPlayer.release()
+                    mPlayer = MediaPlayer.create(this, R.raw.correct)
+                    mPlayer.start()
+                }
                 textViewResult.text = "Đúng rồi"
                 textViewResult.visibility = View.VISIBLE
                 Handler().postDelayed(
@@ -335,6 +358,11 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
             } else {
                 for (i in 0..solution.length - 1) {
                     myButtons[i].setBackgroundResource(R.drawable.btn_false)
+                }
+                if (mPlayer != null && isMute==false) {
+                    mPlayer.release()
+                    mPlayer = MediaPlayer.create(this, R.raw.incorrect)
+                    mPlayer.start()
                 }
                 textViewResult.text = "Sai rồi"
                 textViewResult.visibility = View.VISIBLE
@@ -359,6 +387,8 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
         countSelected = 0
         currentIdx = 0
         help = 3
+        buttonSkip.visibility = View.GONE
+        buttonShare.visibility = View.GONE
     }
 
     override fun onBackPressed() {

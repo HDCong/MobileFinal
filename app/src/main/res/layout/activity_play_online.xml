@@ -8,37 +8,53 @@
     tools:context=".playonline.PlayOnlineActivity">
     <!--    Show round -->
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:id="@+id/lineartfirst"
         android:orientation="horizontal"
-        android:padding="20dp">
+        android:layout_margin="10dp">
 
         <TextView
             android:id="@+id/textViewShowRound"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="3"
             android:fontFamily="@font/alfa_slab_one"
             android:text="Tốp đẹp zai"
-            android:textSize="35sp" />
+            android:textSize="26sp"
+            android:layout_marginRight="20dp"/>
 
         <TextView
             android:id="@+id/textViewCountDown"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
             android:fontFamily="@font/atomic_age"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:layout_marginTop="10dp"
+            android:layout_toLeftOf="@id/buttonHintOnl"/>
         <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:scaleType="fitXY"
             android:background="@drawable/hint_icon"
             android:visibility="gone"
-            android:id="@+id/buttonHintOnl" />
-    </LinearLayout>
+            android:id="@+id/buttonHintOnl"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_toLeftOf="@id/buttonSound"/>
+        <ImageView
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:scaleType="fitXY"
+            android:background="@drawable/speaker"
+            android:visibility="gone"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_alignParentRight="true"
+            android:id="@+id/buttonSound" />
+    </RelativeLayout>
     <!--    Show picture-->
     <LinearLayout
         android:id="@+id/layoutPictureQuestion"
