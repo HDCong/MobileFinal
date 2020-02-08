@@ -52,6 +52,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
     var help = 3
     var solution = ""
     var urlPic = ""
+    var skipTime = 3
     var round = 1
     var currentIdx = 0
     var userSolution = ""
@@ -95,16 +96,22 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
             takeScreenShot()
         }
         buttonSkip.setOnClickListener {
-            removeView()
-            getQuestionAndAnswer()
+            if (skipTime > 0) {
+
+                removeView()
+                getQuestionAndAnswer()
+                skipTime--
+            } else {
+                Toast.makeText(this, "Chỉ được đổi câu hỏi tối đa 3 lần 1 vòng", Toast.LENGTH_SHORT)
+                    .show()
+            }
         }
         buttonSound.setOnClickListener {
-            if(isMute){
+            if (isMute) {
                 isMute = false
                 buttonSound.setBackgroundResource(R.drawable.speaker)
-            }
-            else{
-                isMute=true
+            } else {
+                isMute = true
                 buttonSound.setBackgroundResource(R.drawable.mute)
             }
         }
@@ -133,6 +140,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
             //setting screenshot in imageview
             val filePath = imageFile.path
             Log.e("Cong", filePath)
+            Toast.makeText(this, "Đã chụp màn hình để chia sẽ", Toast.LENGTH_SHORT).show()
             shareIntent(filePath)
         } catch (e: Exception) {
             throw e
@@ -340,7 +348,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
                 for (i in 0..solution.length - 1) {
                     myButtons[i].setBackgroundResource(R.drawable.btn_true)
                 }
-                if (mPlayer != null && isMute==false) {
+                if (mPlayer != null && isMute == false) {
                     mPlayer.release()
                     mPlayer = MediaPlayer.create(this, R.raw.correct)
                     mPlayer.start()
@@ -351,6 +359,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
                     {
                         removeView()
                         round++
+                        skipTime = 2
                         getQuestionAndAnswer()
                     },
                     2000 // value in milliseconds
@@ -359,7 +368,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
                 for (i in 0..solution.length - 1) {
                     myButtons[i].setBackgroundResource(R.drawable.btn_false)
                 }
-                if (mPlayer != null && isMute==false) {
+                if (mPlayer != null && isMute == false) {
                     mPlayer.release()
                     mPlayer = MediaPlayer.create(this, R.raw.incorrect)
                     mPlayer.start()

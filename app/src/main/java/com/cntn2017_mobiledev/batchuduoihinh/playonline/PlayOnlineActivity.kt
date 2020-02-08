@@ -53,7 +53,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
     var isNotStarted = true
     //    var str =""
     var countResponse = 0
-    var totalScore: Long = 0
+    var totalScore: Long = 3000
     var time: Long = 0
     var username = ""
     lateinit var listUser: ArrayList<User>
@@ -179,7 +179,7 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
 //        mSocket.emit("updateList", rooomid,username)
 
         buttonHintOnl.setOnClickListener {
-            if (totalScore > 1000) {
+            if (totalScore >= 1000) {
                 if (currentIdx == solution.length - 1) {
                     Toast.makeText(this, "Còn chữ cuối tự đoán đi :)", Toast.LENGTH_SHORT).show()
 
