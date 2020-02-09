@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
 
         builder = AlertDialog.Builder(this)
             .setView(roomOptionView)
-            .setTitle("Choose room")
+            .setTitle("Chọn phòng")
 
         mSocket.on("RoomID", getRoomID)
         mSocket.on("CreatedRoom", roomCreate)

@@ -608,11 +608,12 @@ class PlayOnlineActivity : AppCompatActivity(), View.OnClickListener {
     override fun onBackPressed() {
         if (doubleBackToExitPressedOnce) {
             if (isNotStarted) {
-                mSocket.emit("removePlayer", rooomid, username)
                 Log.e("CONG-", "remove nek")
                 if (flag == 1) {
+                    Log.e("Cong","key log out ")
                     mSocket.emit("closeRoom", rooomid)
                 }
+                mSocket.emit("removePlayer", rooomid, username)
             }
             super.onBackPressed()
             return

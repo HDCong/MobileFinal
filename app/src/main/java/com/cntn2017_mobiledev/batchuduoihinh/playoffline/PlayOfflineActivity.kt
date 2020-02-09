@@ -97,10 +97,10 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
         }
         buttonSkip.setOnClickListener {
             if (skipTime > 0) {
-
                 removeView()
                 getQuestionAndAnswer()
                 skipTime--
+                buttonSkip.text=skipTime.toString()
             } else {
                 Toast.makeText(this, "Chỉ được đổi câu hỏi tối đa 3 lần 1 vòng", Toast.LENGTH_SHORT)
                     .show()
@@ -140,7 +140,7 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
             //setting screenshot in imageview
             val filePath = imageFile.path
             Log.e("Cong", filePath)
-            Toast.makeText(this, "Đã chụp màn hình để chia sẽ", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Đã chụp màn hình để chia sẻ", Toast.LENGTH_SHORT).show()
             shareIntent(filePath)
         } catch (e: Exception) {
             throw e
@@ -359,7 +359,8 @@ class PlayOfflineActivity : AppCompatActivity(), View.OnClickListener {
                     {
                         removeView()
                         round++
-                        skipTime = 2
+                        skipTime = 3
+                        buttonSkip.text="Skip"
                         getQuestionAndAnswer()
                     },
                     2000 // value in milliseconds
